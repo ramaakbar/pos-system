@@ -5,6 +5,8 @@ import { z } from "zod";
 
 export const Routes = {
   home: makeRoute(() => "/"),
+  login: makeRoute(() => "/login"),
+  register: makeRoute(() => "/register"),
 };
 
 type RouteBuilder<Params extends z.ZodSchema, Search extends z.ZodSchema> = {
