@@ -79,7 +79,7 @@ class AuthRoutesConfig {
   });
 
   public logout = createRouteConfig({
-    method: "get",
+    method: "post",
     path: "/logout",
     guard: isPublic,
     tags: ["auth"],
