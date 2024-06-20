@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 
 import { getUser } from "@/app/actions";
+import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
-import { Text } from "@/components/ui/text";
 import { Routes } from "@/lib/routes";
 
 import { LoginForm } from "./login-form";
@@ -14,21 +15,17 @@ export default async function LoginPage() {
   if (user) throw redirect(Routes.home());
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex h-full items-center justify-center">
+      <div className="absolute right-0 top-0 p-4">
+        <Button variant={"ghost"} asChild={true}>
+          <Link href={Routes.register()}>
+            Register <ChevronRight className="size-4" />
+          </Link>
+        </Button>
+      </div>
       <main className="mx-auto w-full max-w-lg px-4">
         <div className="mb-5 space-y-2">
           <Heading variant="h2">Login</Heading>
-          <div>
-            <Text>
-              Dont have an account?{" "}
-              <Link
-                href={Routes.register()}
-                className="text-accent-foreground hover:underline"
-              >
-                Sign up
-              </Link>
-            </Text>
-          </div>
         </div>
         <LoginForm />
       </main>

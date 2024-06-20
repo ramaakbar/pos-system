@@ -21,7 +21,7 @@ import { Routes } from "@/lib/routes";
 import { client } from "@/server/client";
 import { loginDtoSchema } from "@/server/modules/auth/schema";
 
-export function LoginForm() {
+export function RegisterForm() {
   const { push } = useRouter();
 
   const form = useForm<z.infer<typeof loginDtoSchema>>({
@@ -40,7 +40,7 @@ export function LoginForm() {
   >({
     mutationKey: ["user"],
     mutationFn: (values) =>
-      client.api.auth.login.$post({
+      client.api.auth.register.$post({
         json: values,
       }),
     onSuccess: async () => {
@@ -100,7 +100,7 @@ export function LoginForm() {
               Loading...
             </>
           ) : (
-            <>Login</>
+            <>Register</>
           )}
         </Button>
       </form>

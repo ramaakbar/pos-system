@@ -1,22 +1,33 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 
+import { getUser } from "@/app/actions";
+import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
-import { Text } from "@/components/ui/text";
 import { Routes } from "@/lib/routes";
 
-export default function RegisterPage() {
+import { RegisterForm } from "./register-form";
+
+export default async function RegisterPage() {
+  const user = await getUser();
+
+  if (user) throw redirect(Routes.home());
+
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex h-full items-center justify-center">
+      <div className="absolute right-0 top-0 p-4">
+        <Button variant={"ghost"} asChild={true}>
+          <Link href={Routes.login()}>
+            Login <ChevronRight className="size-4" />
+          </Link>
+        </Button>
+      </div>
       <main className="mx-auto w-full max-w-lg px-4">
-        <Heading variant="h2" className="mb-5">
-          Register
-        </Heading>
-        <div>
-          <Text>
-            Already have an account? <Link href={Routes.login()}>Sign In</Link>
-          </Text>
+        <div className="mb-5 space-y-2">
+          <Heading variant="h2">Register</Heading>
         </div>
-        {/* <LoginForm /> */}
+        <RegisterForm />
       </main>
     </div>
   );
