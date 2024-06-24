@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 import { userSchema } from "@/server/db/schema/users";
 import {

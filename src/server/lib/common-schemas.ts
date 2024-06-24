@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 export const errorSchema = z.object({
   status: z.number(),
@@ -14,6 +14,14 @@ export const paginationQuerySchema = z.object({
   search: z.string().optional(),
   sort: z.enum(["createdAt"]).default("createdAt").optional(),
   order: z.enum(["asc", "desc"]).default("asc").optional(),
-  page: z.coerce.number().default(1),
-  limit: z.coerce.number().default(30),
+  page: z
+    .string()
+    .optional()
+    .pipe(z.coerce.number().default(1))
+    .openapi({ type: "integer" }),
+  limit: z
+    .string()
+    .optional()
+    .pipe(z.coerce.number().default(30))
+    .openapi({ type: "integer" }),
 });
