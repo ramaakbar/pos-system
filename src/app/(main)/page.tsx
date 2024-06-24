@@ -1,66 +1,46 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { HomeIcon } from "lucide-react";
+"use client";
 
-import { Button } from "@/components/ui/button";
-import { Routes } from "@/lib/routes";
+import { useQuery } from "@tanstack/react-query";
 
-import { getUser, logout } from "../actions";
+import { Heading } from "@/components/ui/heading";
+import { Input } from "@/components/ui/input";
+import { DataTable } from "@/components/ui/table/data-table";
+import TableSkeleton from "@/components/ui/table/table-skeleton";
+import { client } from "@/server/client";
 
-export default async function Home() {
-  const user = await getUser();
+import { columns } from "./_products/columns";
 
-  if (!user) {
-    throw redirect(Routes.login());
-  }
+export default function Home() {
+  const { data, isPending, error } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const res = await client.api.products.$get({
+        query: {
+          page: "1",
+        },
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      const error = (await res.json()).error.message;
+      throw new Error(error);
+    },
+  });
 
   return (
-    <div className="mx-auto flex h-full max-w-7xl flex-col">
-      {/* <header className="flex items-center justify-between border-b border-border p-4">
-        <div>Test</div>
-        <nav className="space-x-5">
-          <Link href={"/"}>Home</Link>
-          <Link href={"/"}>Products</Link>
-          <Link href={"/"}>Orders</Link>
-          <Link href={"/"}>Customers</Link>
-        </nav>
-      </header> */}
-      <main className="flex-1 px-4">
-        <div className="container flex h-full flex-col items-center justify-center gap-2">
-          <h1 className="text-4xl font-semibold">{user.email}</h1>
-          <form action={logout}>
-            <Button>Logout</Button>
-          </form>
-        </div>
-      </main>
-      <nav className="border-t px-4">
-        <div className="mx-auto flex max-w-4xl justify-between">
-          <Link href={"/"}>
-            <Button variant="ghost" className="flex h-auto flex-col">
-              <HomeIcon className="size-6" />
-              Home
-            </Button>
-          </Link>
-          <Link href={"/"}>
-            <Button variant="ghost" className="flex h-auto flex-col">
-              <HomeIcon className="size-6" />
-              Home
-            </Button>
-          </Link>
-          <Link href={"/"}>
-            <Button variant="ghost" className="flex h-auto flex-col">
-              <HomeIcon className="size-6" />
-              Home
-            </Button>
-          </Link>
-          <Link href={"/"}>
-            <Button variant="ghost" className="flex h-auto flex-col">
-              <HomeIcon className="size-6" />
-              Home
-            </Button>
-          </Link>
-        </div>
-      </nav>
+    <div className="max-height-screen grid size-full grid-cols-12">
+      <div className="max-height-screen col-span-8 flex h-full flex-col overflow-scroll">
+        <Heading variant="h2">Products</Heading>
+        <Input className="mb-10 w-full" placeholder="Search" />
+        {!isPending && data ? (
+          <DataTable columns={columns} data={data.data} />
+        ) : (
+          <TableSkeleton col={4} row={10} />
+        )}
+      </div>
+      <div className="col-span-4 flex flex-col">
+        <Heading variant="h2">Cart</Heading>
+      </div>
     </div>
   );
 }

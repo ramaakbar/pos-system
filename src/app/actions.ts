@@ -1,3 +1,5 @@
+"use server";
+
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -14,7 +16,6 @@ export const getUser = cache(async () => {
 });
 
 export async function logout() {
-  "use server";
   const sessionId = cookies().get(auth.sessionCookieName)?.value;
 
   if (!sessionId) {

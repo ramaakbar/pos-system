@@ -70,3 +70,7 @@
       "calt" 1;
   }
 }
+
+.max-height-screen {
+  height: calc(100vh - 60px);
+}
