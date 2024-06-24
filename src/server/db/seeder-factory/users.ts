@@ -7,8 +7,8 @@ function userFactory() {
   const firstName = faker.person.firstName();
   const lastName = faker.person.lastName();
   const date = faker.date.between({
-    from: "2022-01-01T00:00:00.000Z",
-    to: "2023-01-31T00:00:00.000Z",
+    from: "2023-01-01T00:00:00.000Z",
+    to: "2024-01-31T00:00:00.000Z",
   });
 
   const userObj: typeof usersTable.$inferSelect = {
@@ -22,15 +22,15 @@ function userFactory() {
   return userObj;
 }
 export async function userSeeder({
-  db,
+  tx,
   count,
 }: {
-  db: typeof DbType;
+  tx: typeof DbType;
   count: number;
 }) {
   await Promise.all(
     [...Array(count)].map(async () => {
-      await db.insert(usersTable).values(userFactory());
+      await tx.insert(usersTable).values(userFactory());
     })
   );
 }

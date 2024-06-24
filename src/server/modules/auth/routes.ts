@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { userSchema } from "@/server/db/schema/users";
 import {
   errorResponses,
   successResponseWithDataSchema,
@@ -8,7 +9,6 @@ import {
 import { createRouteConfig } from "@/server/lib/route-config";
 import { isAuthenticated, isPublic } from "@/server/middlewares/guard";
 
-import { apiUserSchema } from "../users/schema";
 import { loginDtoSchema, registerDtoSchema } from "./schema";
 
 class AuthRoutesConfig {
@@ -37,7 +37,7 @@ class AuthRoutesConfig {
         }),
         content: {
           "application/json": {
-            schema: successResponseWithDataSchema(apiUserSchema),
+            schema: successResponseWithDataSchema(userSchema),
           },
         },
       },
@@ -110,7 +110,7 @@ class AuthRoutesConfig {
         description: "User",
         content: {
           "application/json": {
-            schema: successResponseWithDataSchema(apiUserSchema),
+            schema: successResponseWithDataSchema(userSchema),
           },
         },
       },

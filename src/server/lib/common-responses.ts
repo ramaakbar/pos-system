@@ -18,10 +18,15 @@ export const successResponseWithPaginationSchema = <T extends z.ZodTypeAny>(
 ) =>
   z.object({
     success: z.boolean(),
-    data: z.object({
-      items: schema.array(),
+    pagination: z.object({
       total: z.number(),
+      pageCount: z.number(),
+      currentPage: z.number(),
+      perPage: z.number(),
+      from: z.number(),
+      to: z.number(),
     }),
+    data: schema.array(),
   });
 
 export const successResponseWithErrorsSchema = () =>

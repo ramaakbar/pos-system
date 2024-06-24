@@ -5,7 +5,7 @@ import { serverEnvs } from "@/env/server";
 
 import { db } from ".";
 import { sessionsTable } from "./schema/sessions";
-import { UserModel, usersTable } from "./schema/users";
+import { User, usersTable } from "./schema/users";
 
 const adapter = new DrizzleMySQLAdapter(db, sessionsTable, usersTable);
 
@@ -15,7 +15,7 @@ export const auth = new Lucia(adapter, {
       secure: serverEnvs.NODE_ENV === "production",
     },
   },
-  getUserAttributes: ({ password, ...userAttr }) => {
+  getUserAttributes: (userAttr) => {
     return userAttr;
   },
 });
@@ -23,6 +23,6 @@ export const auth = new Lucia(adapter, {
 declare module "lucia" {
   interface Register {
     Lucia: typeof auth;
-    DatabaseUserAttributes: UserModel;
+    DatabaseUserAttributes: User;
   }
 }

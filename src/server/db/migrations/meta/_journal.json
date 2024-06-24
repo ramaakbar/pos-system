@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1718201731838,
-      "tag": "0000_powerful_monster_badoon",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1718202474726,
-      "tag": "0001_complex_madrox",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1718273835943,
-      "tag": "0002_material_ronan",
+      "when": 1718957798930,
+      "tag": "0000_hard_wendigo",
       "breakpoints": true
     }
   ]

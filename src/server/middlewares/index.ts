@@ -1,6 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
-import { csrf } from "hono/csrf";
 import { secureHeaders } from "hono/secure-headers";
 
 import { getBaseUrl } from "@/lib/utils";
@@ -23,11 +22,11 @@ app.use(
   })
 );
 
-app.use(
-  "*",
-  csrf({
-    origin: getBaseUrl(),
-  })
-);
+// app.use(
+//   "*",
+//   csrf({
+//     origin: getBaseUrl(),
+//   })
+// );
 
 export default app;

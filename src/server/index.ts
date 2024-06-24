@@ -2,6 +2,8 @@ import docs from "./lib/docs";
 import { errorResponse } from "./lib/errors";
 import middlewares from "./middlewares";
 import { authRoutes } from "./modules/auth";
+import { categoriesRoute } from "./modules/categories";
+import { productsRoute } from "./modules/products";
 import { CustomHono } from "./types";
 
 const app = new CustomHono();
@@ -18,10 +20,14 @@ app.notFound((ctx) => {
 });
 
 app.onError((err, ctx) => {
+  console.log(err);
   return errorResponse(ctx, 500, "Internal server Error");
 });
 
-const routes = app.route("/api/auth", authRoutes);
+const routes = app
+  .route("/api/auth", authRoutes)
+  .route("/api/categories", categoriesRoute)
+  .route("/api/products", productsRoute);
 
 export type AppType = typeof routes;
 
