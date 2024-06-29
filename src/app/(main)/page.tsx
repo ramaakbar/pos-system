@@ -6,24 +6,22 @@ import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/table/data-table";
 import TableSkeleton from "@/components/ui/table/table-skeleton";
-import { client } from "@/server/client";
+import { client } from "@/lib/client";
 
 import { columns } from "./_products/columns";
 
 export default function Home() {
-  const { data, isPending, error } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const res = await client.api.products.$get({
-        query: {
-          page: "1",
-        },
+      const { data, error } = await client.api.products.index.get({
+        query: {},
       });
-      if (res.ok) {
-        return await res.json();
+
+      if (error) {
+        throw error.value;
       }
-      const error = (await res.json()).error.message;
-      throw new Error(error);
+      return data;
     },
   });
 

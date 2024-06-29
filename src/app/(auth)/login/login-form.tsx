@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { DefaultError, useMutation } from "@tanstack/react-query";
+import { UnwrapSchema } from "elysia";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +17,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { client } from "@/lib/client";
 import { Routes } from "@/lib/routes";
-import { client } from "@/server/client";
 import { loginDtoSchema } from "@/server/modules/auth/schema";
 
 export function LoginForm() {
   const { push } = useRouter();
 
-  const form = useForm<z.infer<typeof loginDtoSchema>>({
-    resolver: zodResolver(loginDtoSchema),
+  const form = useForm<UnwrapSchema<typeof loginDtoSchema>>({
+    resolver: typeboxResolver(loginDtoSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -36,13 +36,16 @@ export function LoginForm() {
   const { mutate, isPending } = useMutation<
     unknown,
     DefaultError,
-    z.infer<typeof loginDtoSchema>
+    UnwrapSchema<typeof loginDtoSchema>
   >({
     mutationKey: ["user"],
-    mutationFn: (values) =>
-      client.api.auth.login.$post({
-        json: values,
-      }),
+    mutationFn: async (values) => {
+      const { data, error } = await client.api.auth.login.post(values);
+      if (error) {
+        throw error.value;
+      }
+      return data;
+    },
     onSuccess: async () => {
       push(Routes.home());
     },

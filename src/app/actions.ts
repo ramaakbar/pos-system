@@ -2,30 +2,17 @@
 
 import { cache } from "react";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
-import { Routes } from "@/lib/routes";
-import { auth } from "@/server/db/lucia";
+import { client } from "@/lib/client";
 
 export const getUser = cache(async () => {
-  const sessionId = cookies().get(auth.sessionCookieName)?.value;
-  if (!sessionId) return null;
-
-  const { user } = await auth.validateSession(sessionId);
-  return user;
-});
-
-export async function logout() {
-  const sessionId = cookies().get(auth.sessionCookieName)?.value;
-
-  if (!sessionId) {
-    return redirect(Routes.login());
-  }
-
-  await auth.invalidateSession(sessionId);
-  cookies().set(auth.sessionCookieName, "", {
-    expires: new Date(0),
-    sameSite: "strict",
+  const { data, error } = await client.api.auth.me.get({
+    headers: {
+      Cookie: cookies().toString(),
+    },
   });
-  return redirect(Routes.login());
-}
+  if (error) {
+    return null;
+  }
+  return data.data;
+});

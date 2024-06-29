@@ -6,8 +6,8 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import { createSelectSchema } from "drizzle-typebox";
+import { UnwrapSchema } from "elysia";
 
 import { categoriesTable } from "./categories";
 
@@ -30,9 +30,6 @@ export const productsTable = mysqlTable("products", {
     .notNull(),
 });
 
-export const productSchema = createSelectSchema(productsTable, {
-  createdAt: z.string(),
-  updatedAt: z.string().nullable(),
-});
+export const productSchema = createSelectSchema(productsTable);
 
-export type Product = z.infer<typeof productSchema>;
+export type Product = UnwrapSchema<typeof productSchema>;

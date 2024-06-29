@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { int, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
-import { createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import { createSelectSchema } from "drizzle-typebox";
+import { UnwrapSchema } from "elysia";
 
 export const categoriesTable = mysqlTable("categories", {
   id: int("id").primaryKey().autoincrement(),
@@ -19,9 +19,6 @@ export const categoriesTable = mysqlTable("categories", {
     .notNull(),
 });
 
-export const categorySchema = createSelectSchema(categoriesTable, {
-  createdAt: z.string(),
-  updatedAt: z.string().nullable(),
-});
+export const categorySchema = createSelectSchema(categoriesTable);
 
-export type Category = z.infer<typeof categorySchema>;
+export type Category = UnwrapSchema<typeof categorySchema>;

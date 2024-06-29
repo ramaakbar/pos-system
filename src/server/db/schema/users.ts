@@ -5,8 +5,8 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import { createSelectSchema } from "drizzle-typebox";
+import { t, UnwrapSchema } from "elysia";
 
 export const usersTable = mysqlTable("users", {
   id: varchar("id", { length: 255 }).primaryKey(),
@@ -22,11 +22,8 @@ export const usersTable = mysqlTable("users", {
     .notNull(),
 });
 
-export const userSchema = createSelectSchema(usersTable, {
-  createdAt: z.string(),
-  updatedAt: z.string().nullable(),
-}).omit({
-  password: true,
-});
+const userSchemaTemp = createSelectSchema(usersTable);
 
-export type User = z.infer<typeof userSchema>;
+export const userSchema = t.Omit(userSchemaTemp, ["password"]);
+
+export type User = UnwrapSchema<typeof userSchema>;

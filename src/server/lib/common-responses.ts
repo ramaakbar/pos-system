@@ -1,78 +1,37 @@
-import { createRoute, z } from "@hono/zod-openapi";
+import { t, TSchema } from "elysia";
 
-import { errorResponseSchema, errorSchema } from "./common-schemas";
-
-type Responses = Parameters<typeof createRoute>[0]["responses"];
-
-export const successResponseWithoutDataSchema = z.object({
-  success: z.boolean(),
+export const successResponseWithoutDataSchema = t.Object({
+  success: t.Boolean({ default: true }),
 });
 
-export const successResponseWithDataSchema = <T extends z.ZodTypeAny>(
-  schema: T
-) => z.object({ success: z.boolean(), data: schema });
+export const successResponseWithDataSchema = <T extends TSchema>(schema: T) =>
+  t.Object({ success: t.Boolean({ default: true }), data: schema });
 
-export const successResponseWithPaginationSchema = <T extends z.ZodTypeAny>(
+export const successResponseWithPaginationSchema = <T extends TSchema>(
   schema: T
 ) =>
-  z.object({
-    success: z.boolean(),
-    pagination: z.object({
-      total: z.number(),
-      pageCount: z.number(),
-      currentPage: z.number(),
-      perPage: z.number(),
-      from: z.number(),
-      to: z.number(),
+  t.Object({
+    success: t.Boolean(),
+    pagination: t.Object({
+      total: t.Number(),
+      pageCount: t.Number(),
+      currentPage: t.Number(),
+      perPage: t.Number(),
+      from: t.Number(),
+      to: t.Number(),
     }),
-    data: schema.array(),
+    data: t.Array(schema),
   });
 
-export const successResponseWithErrorsSchema = () =>
-  z.object({
-    success: z.boolean(),
-    errors: z.array(errorSchema),
-  });
+export const errorResponseSchema = t.Object({
+  success: t.Boolean({ default: false }),
+  message: t.String(),
+});
 
 export const errorResponses = {
-  400: {
-    description: "Bad request: problem processing request.",
-    content: {
-      "application/json": {
-        schema: errorResponseSchema,
-      },
-    },
-  },
-  401: {
-    description: "Unauthorized: authentication required.",
-    content: {
-      "application/json": {
-        schema: errorResponseSchema,
-      },
-    },
-  },
-  403: {
-    description: "Forbidden: insufficient permissions.",
-    content: {
-      "application/json": {
-        schema: errorResponseSchema,
-      },
-    },
-  },
-  404: {
-    description: "Not found: resource does not exist.",
-    content: {
-      "application/json": {
-        schema: errorResponseSchema,
-      },
-    },
-  },
-  500: {
-    description: "Server error: something went wrong.",
-    content: {
-      "application/json": {
-        schema: errorResponseSchema,
-      },
-    },
-  },
-} satisfies Responses;
+  400: errorResponseSchema,
+  401: errorResponseSchema,
+  403: errorResponseSchema,
+  404: errorResponseSchema,
+  500: errorResponseSchema,
+};
