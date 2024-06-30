@@ -1,10 +1,13 @@
 import { sql } from "drizzle-orm";
-import { int, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-typebox";
 import { UnwrapSchema } from "elysia";
+import { ulid } from "ulid";
 
 export const categoriesTable = mysqlTable("categories", {
-  id: int("id").primaryKey().autoincrement(),
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .$defaultFn(() => ulid()),
   name: varchar("name", {
     length: 255,
   })

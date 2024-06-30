@@ -13,7 +13,7 @@ function productFactory(ctg: Array<typeof categoriesTable.$inferSelect>) {
 
   const productObj: Omit<typeof productsTable.$inferSelect, "id"> = {
     name: faker.commerce.productName(),
-    categoryId: randomInt(ctg.length) + 1,
+    categoryId: ctg[randomInt(ctg.length)].id,
     description: faker.commerce.productDescription(),
     price: parseInt(faker.commerce.price({ min: 1000, max: 20000, dec: 0 })),
     media: faker.image.urlPicsumPhotos({ width: 600, height: 600 }),

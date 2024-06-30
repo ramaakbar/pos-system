@@ -1,7 +1,7 @@
 import { t } from "elysia";
 
 export const idParamSchema = t.Object({
-  id: t.Numeric({
+  id: t.String({
     error: "Invalid id param",
   }),
 });
