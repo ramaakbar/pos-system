@@ -3,7 +3,7 @@ import { faker } from "@faker-js/faker";
 import { db as DbType } from "..";
 import { usersTable } from "../schema/users";
 
-function userFactory() {
+async function userFactory() {
   const firstName = faker.person.firstName();
   const lastName = faker.person.lastName();
   const date = faker.date.between({
@@ -14,7 +14,7 @@ function userFactory() {
   const userObj: typeof usersTable.$inferSelect = {
     id: faker.string.numeric(15),
     email: faker.internet.email({ firstName, lastName }),
-    password: faker.internet.password(),
+    password: await Bun.password.hash("password"),
     role: "Member",
     createdAt: date,
     updatedAt: date,
@@ -30,7 +30,7 @@ export async function userSeeder({
 }) {
   await Promise.all(
     [...Array(count)].map(async () => {
-      await tx.insert(usersTable).values(userFactory());
+      await tx.insert(usersTable).values(await userFactory());
     })
   );
 }

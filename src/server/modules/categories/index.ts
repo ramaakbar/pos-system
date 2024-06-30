@@ -1,42 +1,59 @@
 import { eq } from "drizzle-orm";
+import Elysia, { t } from "elysia";
 
 import { db } from "@/server/db";
-import { categoriesTable } from "@/server/db/schema/categories";
-import { errorResponse } from "@/server/lib/errors";
+import { categoriesTable, categorySchema } from "@/server/db/schema/categories";
+import { successResponseWithDataSchema } from "@/server/lib/common-responses";
+import { idParamSchema } from "@/server/lib/common-schemas";
+import { ctx } from "@/server/plugins/context";
 
-import defaultHook from "../../lib/default-hook";
-import { CustomHono } from "../../types";
-import categoriesRoutesConfig from "./routes";
-
-export const categoriesRoute = new CustomHono({
-  defaultHook,
+export const categoriesRoute = new Elysia({
+  prefix: "/categories",
+  detail: {
+    tags: ["Categories"],
+  },
 })
-  .openapi(categoriesRoutesConfig.getCategories, async (ctx) => {
-    const categories = await db.select().from(categoriesTable);
+  .use(ctx)
+  .get(
+    "/",
+    async (ctx) => {
+      const categories = await db.select().from(categoriesTable);
 
-    return ctx.json(
-      {
+      return {
         success: true,
         data: categories,
+      };
+    },
+    {
+      response: {
+        200: successResponseWithDataSchema(t.Array(categorySchema)),
       },
-      200
-    );
-  })
-  .openapi(categoriesRoutesConfig.getCategory, async (ctx) => {
-    const id = parseInt(ctx.req.valid("param").id);
+    }
+  )
+  .get(
+    "/:id",
+    async ({ params, set }) => {
+      const id = params.id;
 
-    const [category] = await db
-      .select()
-      .from(categoriesTable)
-      .where(eq(categoriesTable.id, id));
+      const [category] = await db
+        .select()
+        .from(categoriesTable)
+        .where(eq(categoriesTable.id, id));
 
-    if (!category) return errorResponse(ctx, 400, "Category not found");
+      if (!category) {
+        set.status = "Bad Request";
+        throw new Error("Category not found");
+      }
 
-    return ctx.json(
-      {
+      return {
         success: true,
         data: category,
+      };
+    },
+    {
+      params: idParamSchema,
+      response: {
+        200: successResponseWithDataSchema(categorySchema),
       },
-      200
-    );
-  });
+    }
+  );

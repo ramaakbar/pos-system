@@ -1,5 +1,5 @@
 CREATE TABLE `categories` (
-	`id` int AUTO_INCREMENT NOT NULL,
+	`id` varchar(255) NOT NULL,
 	`name` varchar(255) NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -8,8 +8,8 @@ CREATE TABLE `categories` (
 );
 --> statement-breakpoint
 CREATE TABLE `products` (
-	`id` int AUTO_INCREMENT NOT NULL,
-	`category_id` int NOT NULL,
+	`id` varchar(255) NOT NULL,
+	`category_id` varchar(255) NOT NULL,
 	`name` varchar(255) NOT NULL,
 	`description` text,
 	`media` varchar(255),

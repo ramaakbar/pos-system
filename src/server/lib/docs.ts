@@ -1,40 +1,21 @@
-import { apiReference } from "@scalar/hono-api-reference";
+import swagger from "@elysiajs/swagger";
 
-import { getBaseUrl } from "@/lib/utils";
-
-import { CustomHono } from "../types";
-
-const docs = (app: CustomHono) => {
-  const registry = app.openAPIRegistry;
-
-  registry.registerComponent("securitySchemes", "cookieAuth", {
-    type: "apiKey",
-    in: "cookie",
-    name: "auth_session",
-    description: "Cookie Authentication",
-  });
-
-  app.doc31("/api/openapi.json", {
-    servers: [{ url: getBaseUrl() + "/api" }],
-    info: {
-      title: "Erp API",
-      version: "v1",
-      description: `
+export const docs = () =>
+  swagger({
+    path: "/docs",
+    documentation: {
+      info: {
+        title: "Erp API",
+        version: "1.0.0",
+        description: `
       This is a description about the api
       `,
-    },
-    openapi: "3.1.0",
-    security: [{ cookieAuth: [] }],
-  });
-
-  app.get(
-    "/api/docs",
-    apiReference({
-      spec: {
-        url: "/api/openapi.json",
       },
-    })
-  );
-};
-
-export default docs;
+      security: [{ cookieAuth: [] }],
+      tags: [
+        { name: "Auth", description: "Authentication endpoints" },
+        { name: "Categories", description: "Categories endpoints" },
+        { name: "Products", description: "Products endpoints" },
+      ],
+    },
+  });

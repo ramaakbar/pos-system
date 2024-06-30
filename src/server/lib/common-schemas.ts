@@ -1,27 +1,17 @@
-import { z } from "@hono/zod-openapi";
+import { t } from "elysia";
 
-export const errorSchema = z.object({
-  status: z.number(),
-  message: z.string(),
+export const idParamSchema = t.Object({
+  id: t.String({
+    error: "Invalid id param",
+  }),
 });
 
-export const errorResponseSchema = z.object({
-  success: z.boolean().default(false),
-  error: errorSchema,
-});
-
-export const paginationQuerySchema = z.object({
-  search: z.string().optional(),
-  sort: z.enum(["createdAt"]).default("createdAt").optional(),
-  order: z.enum(["asc", "desc"]).default("asc").optional(),
-  page: z
-    .string()
-    .optional()
-    .pipe(z.coerce.number().default(1))
-    .openapi({ type: "integer" }),
-  limit: z
-    .string()
-    .optional()
-    .pipe(z.coerce.number().default(30))
-    .openapi({ type: "integer" }),
-});
+export const paginationQuerySchema = t.Partial(
+  t.Object({
+    search: t.String(),
+    sort: t.Union([t.Literal("createdAt")]),
+    order: t.Union([t.Literal("asc"), t.Literal("desc")]),
+    page: t.Numeric(),
+    limit: t.Numeric(),
+  })
+);

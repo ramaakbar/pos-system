@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Inbox, Settings, UserRound } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { Home, Inbox, Loader2, Settings, UserRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,11 +14,10 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Text } from "@/components/ui/text";
+import { client } from "@/lib/client";
 import { Routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { User } from "@/server/db/schema/users";
-
-import { logout } from "../actions";
 
 type Props = {
   user: User;
@@ -25,6 +25,7 @@ type Props = {
 
 export default function BottomNav({ user }: Props) {
   const pathName = usePathname();
+  const { push } = useRouter();
 
   // interface Route {
   //   name: string;
@@ -57,6 +58,20 @@ export default function BottomNav({ user }: Props) {
       icon: UserRound,
     },
   ];
+
+  const { mutate: logout, isPending } = useMutation({
+    mutationKey: ["user"],
+    mutationFn: async () => {
+      const { data, error } = await client.api.auth.logout.post();
+      if (error) {
+        throw error.value;
+      }
+      return data;
+    },
+    onSuccess: async () => {
+      push(Routes.login());
+    },
+  });
 
   return (
     <nav className="border-t bg-white px-4">
@@ -92,9 +107,17 @@ export default function BottomNav({ user }: Props) {
               </DrawerHeader>
               <div className="p-4 pb-0">
                 <Text>{user.email}</Text>
-                <form action={logout}>
-                  <Button>Logout</Button>
-                </form>
+                <Button onClick={() => logout()} disabled={isPending}>
+                  {" "}
+                  {isPending ? (
+                    <>
+                      <Loader2 className={"mr-2 inline size-4 animate-spin"} />
+                      Loading...
+                    </>
+                  ) : (
+                    <>Logout</>
+                  )}
+                </Button>
               </div>
             </div>
           </DrawerContent>

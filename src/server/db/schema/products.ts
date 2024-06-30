@@ -6,14 +6,17 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import { createSelectSchema } from "drizzle-typebox";
+import { UnwrapSchema } from "elysia";
+import { ulid } from "ulid";
 
 import { categoriesTable } from "./categories";
 
 export const productsTable = mysqlTable("products", {
-  id: int("id").primaryKey().autoincrement(),
-  categoryId: int("category_id")
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .$defaultFn(() => ulid()),
+  categoryId: varchar("category_id", { length: 255 })
     .notNull()
     .references(() => categoriesTable.id),
   name: varchar("name", { length: 255 }).unique().notNull(),
@@ -30,9 +33,6 @@ export const productsTable = mysqlTable("products", {
     .notNull(),
 });
 
-export const productSchema = createSelectSchema(productsTable, {
-  createdAt: z.string(),
-  updatedAt: z.string().nullable(),
-});
+export const productSchema = createSelectSchema(productsTable);
 
-export type Product = z.infer<typeof productSchema>;
+export type Product = UnwrapSchema<typeof productSchema>;
