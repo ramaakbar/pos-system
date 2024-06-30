@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: ["*"]
 
+env:
+  NEXT_PUBLIC_DOMAIN: localhost:3001
+
 jobs:
   lint:
     name: Lint
