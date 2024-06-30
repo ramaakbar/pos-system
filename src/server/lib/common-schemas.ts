@@ -1,7 +1,9 @@
 import { t } from "elysia";
 
 export const idParamSchema = t.Object({
-  id: t.Numeric(),
+  id: t.Numeric({
+    error: "Invalid id param",
+  }),
 });
 
 export const paginationQuerySchema = t.Partial(

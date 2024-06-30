@@ -38,7 +38,11 @@ const app = new Elysia({
       return {
         status: false,
         message: error.all
-          .map((err) => (err.schema.error ? err.schema.error : err.message))
+          .map(
+            (err) =>
+              `'${err.path.split("/")[1]}' ` +
+              (err.schema.error ? err.schema.error : err.message)
+          )
           .join("; "),
       };
     } else if (code === "INTERNAL_SERVER_ERROR") {

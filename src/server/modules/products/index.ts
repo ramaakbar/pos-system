@@ -119,7 +119,7 @@ export const productsRoutes = new Elysia({
 
       if (productFound) {
         set.status = "Bad Request";
-        throw new Error("Product not found");
+        throw new Error("Product already exists with the name");
       }
 
       let saveImage = null;
