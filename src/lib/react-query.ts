@@ -9,15 +9,12 @@ export const queryClient = new QueryClient({
   },
   mutationCache: new MutationCache({
     onError: (err) => {
-      //@ts-ignore
-      toast.error(`Login failed : ${err.data.error.message}`);
+      toast.error(`Error : ${err.message}`);
     },
   }),
   queryCache: new QueryCache({
     onError: (error, query) => {
-      if (query.state.data !== undefined) {
-        toast.error(`Something went wrong: ${error.message}`);
-      }
+      toast.error(`Something went wrong: ${error.message}`);
     },
   }),
 });

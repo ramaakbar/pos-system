@@ -1,107 +1,145 @@
 import { eq } from "drizzle-orm";
-import { getCookie, setCookie } from "hono/cookie";
+import { Elysia } from "elysia";
 import { generateIdFromEntropySize } from "lucia";
 
 import { db } from "@/server/db";
-import { errorResponse } from "@/server/lib/errors";
+import { userSchema, usersTable } from "@/server/db/schema/users";
+import {
+  successResponseWithDataSchema,
+  successResponseWithoutDataSchema,
+} from "@/server/lib/common-responses";
+import { ctx } from "@/server/plugins/context";
 
-import { auth } from "../../db/lucia";
-import { usersTable } from "../../db/schema/users";
-import defaultHook from "../../lib/default-hook";
-import { CustomHono } from "../../types";
-import authRoutesConfig from "./routes";
+import { loginDtoSchema, registerDtoSchema } from "./schema";
 
-export const authRoutes = new CustomHono({
-  defaultHook,
+export const authRoutes = new Elysia({
+  prefix: "/auth",
+  detail: {
+    tags: ["Auth"],
+  },
 })
-  .openapi(authRoutesConfig.login, async (ctx) => {
-    const { email, password } = ctx.req.valid("json");
+  .use(ctx)
+  .post(
+    "/login",
+    async ({ body, cookie, set, auth }) => {
+      const { email, password } = body;
 
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email.toLowerCase()));
+      const [user] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.email, email.toLowerCase()));
 
-    if (!user) {
-      return errorResponse(ctx, 404, "Email not found");
-    }
+      if (!user) {
+        set.status = "Bad Request";
+        throw new Error("Email not found");
+      }
 
-    const validPassword = await Bun.password.verify(password, user.password);
-    if (!validPassword) {
-      return errorResponse(ctx, 400, "Invalid Password");
-    }
+      const validPassword = await Bun.password.verify(password, user.password);
+      if (!validPassword) {
+        set.status = "Bad Request";
+        throw new Error("Invalid Credentials");
+      }
 
-    const session = await auth.createSession(user.id, {});
-    const sessionCookie = auth.createSessionCookie(session.id);
-    setCookie(ctx, sessionCookie.name, sessionCookie.value, {
-      ...sessionCookie.attributes,
-      sameSite: "Strict",
-    });
+      const session = await auth.createSession(user.id, {});
+      const sessionCookie = auth.createSessionCookie(session.id);
 
-    const { password: pass, ...userWithoutPass } = user;
+      cookie[sessionCookie.name].value = sessionCookie.value;
+      cookie[sessionCookie.name].set({
+        ...sessionCookie.attributes,
+        sameSite: "strict",
+      });
 
-    return ctx.json(
-      {
+      const { password: pass, ...userWithoutPass } = user;
+
+      return {
         success: true,
         data: userWithoutPass,
+      };
+    },
+    {
+      body: loginDtoSchema,
+      response: {
+        200: successResponseWithDataSchema(userSchema),
       },
-      200
-    );
-  })
-  .openapi(authRoutesConfig.register, async (ctx) => {
-    const { email, password } = ctx.req.valid("json");
-
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email.toLowerCase()));
-
-    if (user) {
-      return errorResponse(ctx, 404, "Email already used");
     }
+  )
+  .post(
+    "/register",
+    async ({ body, cookie, set, auth }) => {
+      const { email, password } = body;
 
-    const passwordHash = await Bun.password.hash(password);
+      const [user] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.email, email.toLowerCase()));
 
-    const userId = generateIdFromEntropySize(10);
+      if (user) {
+        set.status = "Bad Request";
+        throw new Error("Email already used");
+      }
 
-    await db.insert(usersTable).values({
-      id: userId,
-      email,
-      password: passwordHash,
-      role: "Member",
-    });
+      const passwordHash = await Bun.password.hash(password);
 
-    const session = await auth.createSession(userId, {});
-    const sessionCookie = auth.createSessionCookie(session.id);
-    setCookie(ctx, sessionCookie.name, sessionCookie.value, {
-      ...sessionCookie.attributes,
-      sameSite: "Strict",
-    });
+      const userId = generateIdFromEntropySize(10);
 
-    return ctx.json(
-      {
+      await db.insert(usersTable).values({
+        id: userId,
+        email,
+        password: passwordHash,
+        role: "Member",
+      });
+
+      const session = await auth.createSession(userId, {});
+      const sessionCookie = auth.createSessionCookie(session.id);
+
+      cookie[sessionCookie.name].value = sessionCookie.value;
+      cookie[sessionCookie.name].set({
+        ...sessionCookie.attributes,
+        sameSite: "strict",
+      });
+
+      return {
         success: true,
+      };
+    },
+    {
+      body: registerDtoSchema,
+      response: {
+        200: successResponseWithoutDataSchema,
       },
-      200
-    );
-  })
-  .openapi(authRoutesConfig.logout, async (ctx) => {
-    const sessionId = getCookie(ctx, auth.sessionCookieName);
-
-    if (!sessionId) {
-      return errorResponse(ctx, 401, "unauthorized");
     }
+  )
+  .post(
+    "/logout",
+    async ({ cookie, set, auth }) => {
+      const sessionId = cookie[auth.sessionCookieName].value;
 
-    await auth.invalidateSession(sessionId);
-    setCookie(ctx, auth.sessionCookieName, "", {
-      expires: new Date(0),
-      sameSite: "Strict",
-    });
+      if (!sessionId) {
+        set.status = "Unauthorized";
+        throw new Error("Unauthorized");
+      }
 
-    return ctx.json({ success: true }, 200);
+      await auth.invalidateSession(sessionId);
+
+      cookie[auth.sessionCookieName].value = "";
+      cookie[auth.sessionCookieName].set({
+        expires: new Date(0),
+        sameSite: "strict",
+      });
+
+      return {
+        success: true,
+      };
+    },
+    {
+      response: {
+        200: successResponseWithoutDataSchema,
+      },
+    }
+  )
+  .guard({
+    isAuth: true,
   })
-  .openapi(authRoutesConfig.me, async (ctx) => {
-    const user = ctx.get("user");
-
-    return ctx.json({ success: true, data: user }, 200);
+  .get("/me", ({ user }) => {
+    return { data: user };
   });

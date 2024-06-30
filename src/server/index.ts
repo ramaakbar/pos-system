@@ -1,34 +1,77 @@
-import docs from "./lib/docs";
-import { errorResponse } from "./lib/errors";
-import middlewares from "./middlewares";
+import { cors } from "@elysiajs/cors";
+import { Elysia } from "elysia";
+import { helmet } from "elysia-helmet";
+
+import { getBaseUrl } from "@/lib/utils";
+
+import { errorResponses } from "./lib/common-responses";
+import { docs } from "./lib/docs";
 import { authRoutes } from "./modules/auth";
 import { categoriesRoute } from "./modules/categories";
-import { productsRoute } from "./modules/products";
-import { CustomHono } from "./types";
+import { productsRoutes } from "./modules/products";
 
-const app = new CustomHono();
+const app = new Elysia({
+  prefix: "/api",
+})
+  .use(docs())
+  .use(
+    cors({
+      origin: getBaseUrl(),
+      credentials: true,
+    })
+  )
+  .use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+  )
+  .onError(({ code, set, error }) => {
+    if (code === "NOT_FOUND") {
+      set.status = 404;
 
-// Add global middleware
-app.route("", middlewares);
+      return {
+        status: false,
+        message: "Route not found",
+      };
+    } else if (code === "VALIDATION") {
+      set.status = 400;
+      return {
+        status: false,
+        message: error.all
+          .map(
+            (err) =>
+              `'${err.path.split("/")[1]}' ` +
+              (err.schema.error ? err.schema.error : err.message)
+          )
+          .join("; "),
+      };
+    } else if (code === "INTERNAL_SERVER_ERROR") {
+      set.status = 500;
 
-docs(app);
-
-app.get("/api/ping", (ctx) => ctx.json({ message: "pong" }));
-
-app.notFound((ctx) => {
-  return errorResponse(ctx, 404, "Route not found");
-});
-
-app.onError((err, ctx) => {
-  console.log(err);
-  return errorResponse(ctx, 500, "Internal server Error");
-});
-
-const routes = app
-  .route("/api/auth", authRoutes)
-  .route("/api/categories", categoriesRoute)
-  .route("/api/products", productsRoute);
-
-export type AppType = typeof routes;
+      return {
+        status: false,
+        message: "Internal server error",
+      };
+    } else {
+      return {
+        status: false,
+        message: error.message,
+      };
+    }
+  })
+  .get("/ping", () => {
+    return {
+      message: "pong",
+    };
+  })
+  .guard(
+    {
+      response: {
+        ...errorResponses,
+      },
+    },
+    (app) => app.use(authRoutes).use(categoriesRoute).use(productsRoutes)
+  );
 
 export { app };
+export type App = typeof app;
