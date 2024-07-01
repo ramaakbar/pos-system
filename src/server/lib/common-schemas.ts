@@ -11,7 +11,11 @@ export const paginationQuerySchema = t.Partial(
     search: t.String(),
     sort: t.Union([t.Literal("createdAt")]),
     order: t.Union([t.Literal("asc"), t.Literal("desc")]),
-    page: t.Numeric(),
-    limit: t.Numeric(),
+    page: t.Numeric({
+      minimum: 0,
+    }),
+    limit: t.Numeric({
+      minimum: 0,
+    }),
   })
 );

@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { asc, count, desc, eq, ilike, SQL } from "drizzle-orm";
+import { asc, count, desc, eq, like, SQL } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { db } from "@/server/db";
@@ -31,7 +31,7 @@ export const productsRoutes = new Elysia({
       const { search, sort, order, page = 1, limit = 20 } = query;
 
       const filter: SQL | undefined = search
-        ? ilike(productsTable.name, `%${search}%`)
+        ? like(productsTable.name, `%${search}%`)
         : undefined;
 
       const productsQuery = db.select().from(productsTable).where(filter);
@@ -41,6 +41,21 @@ export const productsRoutes = new Elysia({
         .from(productsQuery.as("products"));
 
       const pageCount = Math.ceil(total / Number(limit));
+
+      if (total === 0) {
+        return {
+          success: true,
+          pagination: {
+            total: total,
+            pageCount: pageCount,
+            currentPage: 0,
+            perPage: limit,
+            from: 0,
+            to: 0,
+          },
+          data: [],
+        };
+      }
 
       if (page === 0 || page > pageCount) {
         set.status = "Bad Request";

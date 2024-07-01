@@ -3,20 +3,26 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { Heading } from "@/components/ui/heading";
-import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/table/data-table";
 import TableSkeleton from "@/components/ui/table/table-skeleton";
 import { client } from "@/lib/client";
+import { Main } from "@/routes";
+import { useSearchParams } from "@/routes/hooks";
 
 import CartSection from "./_cart/cartSection";
 import { columns } from "./_products/columns";
+import SearchProduct from "./_products/searchProduct";
 
 export default function Home() {
+  const searchQuery = useSearchParams(Main).search || "";
+
   const { data, isPending } = useQuery({
-    queryKey: ["products"],
+    queryKey: ["products", searchQuery],
     queryFn: async () => {
       const { data, error } = await client.api.products.index.get({
-        query: {},
+        query: {
+          search: searchQuery,
+        },
       });
 
       if (error) {
@@ -30,7 +36,7 @@ export default function Home() {
     <div className="max-height-screen grid size-full grid-cols-12">
       <div className="max-height-screen col-span-8 flex h-full flex-col">
         <Heading variant="h2">Products</Heading>
-        <Input className="mb-10 w-full" placeholder="Search" />
+        <SearchProduct searchQuery={searchQuery} />
         <div className="overflow-scroll">
           {!isPending && data ? (
             <DataTable columns={columns} data={data.data} />
