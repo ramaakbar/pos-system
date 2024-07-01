@@ -7,7 +7,7 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-typebox";
-import { UnwrapSchema } from "elysia";
+import { t, UnwrapSchema } from "elysia";
 import { ulid } from "ulid";
 
 import { categoriesTable } from "./categories";
@@ -33,6 +33,9 @@ export const productsTable = mysqlTable("products", {
     .notNull(),
 });
 
-export const productSchema = createSelectSchema(productsTable);
+export const productSchema = t.Object({
+  ...createSelectSchema(productsTable).properties,
+  categoryName: t.String(),
+});
 
 export type Product = UnwrapSchema<typeof productSchema>;

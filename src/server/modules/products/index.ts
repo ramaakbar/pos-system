@@ -3,6 +3,7 @@ import { asc, count, desc, eq, ilike, SQL } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { db } from "@/server/db";
+import { categoriesTable } from "@/server/db/schema/categories";
 import { productSchema, productsTable } from "@/server/db/schema/products";
 import {
   successResponseWithDataSchema,
@@ -47,8 +48,23 @@ export const productsRoutes = new Elysia({
       }
 
       const products = await db
-        .select()
+        .select({
+          id: productsTable.id,
+          categoryId: productsTable.categoryId,
+          name: productsTable.name,
+          description: productsTable.description,
+          media: productsTable.media,
+          price: productsTable.price,
+          quantity: productsTable.quantity,
+          categoryName: categoriesTable.name,
+          createdAt: productsTable.createdAt,
+          updatedAt: productsTable.updatedAt,
+        })
         .from(productsQuery.as("products"))
+        .innerJoin(
+          categoriesTable,
+          eq(productsTable.categoryId, categoriesTable.id)
+        )
         .limit(limit)
         .offset(limit * (page - 1))
         .orderBy(
@@ -83,8 +99,23 @@ export const productsRoutes = new Elysia({
       const id = params.id;
 
       const [product] = await db
-        .select()
+        .select({
+          id: productsTable.id,
+          categoryId: productsTable.categoryId,
+          name: productsTable.name,
+          description: productsTable.description,
+          media: productsTable.media,
+          price: productsTable.price,
+          quantity: productsTable.quantity,
+          categoryName: categoriesTable.name,
+          createdAt: productsTable.createdAt,
+          updatedAt: productsTable.updatedAt,
+        })
         .from(productsTable)
+        .innerJoin(
+          categoriesTable,
+          eq(productsTable.categoryId, categoriesTable.id)
+        )
         .where(eq(productsTable.id, id));
 
       if (!product) {
@@ -143,8 +174,23 @@ export const productsRoutes = new Elysia({
       });
 
       const [product] = await db
-        .select()
+        .select({
+          id: productsTable.id,
+          categoryId: productsTable.categoryId,
+          name: productsTable.name,
+          description: productsTable.description,
+          media: productsTable.media,
+          price: productsTable.price,
+          quantity: productsTable.quantity,
+          categoryName: categoriesTable.name,
+          createdAt: productsTable.createdAt,
+          updatedAt: productsTable.updatedAt,
+        })
         .from(productsTable)
+        .innerJoin(
+          categoriesTable,
+          eq(productsTable.categoryId, categoriesTable.id)
+        )
         .where(eq(productsTable.name, name));
 
       return {
@@ -201,8 +247,23 @@ export const productsRoutes = new Elysia({
         .where(eq(productsTable.id, id));
 
       const [product] = await db
-        .select()
+        .select({
+          id: productsTable.id,
+          categoryId: productsTable.categoryId,
+          name: productsTable.name,
+          description: productsTable.description,
+          media: productsTable.media,
+          price: productsTable.price,
+          quantity: productsTable.quantity,
+          categoryName: categoriesTable.name,
+          createdAt: productsTable.createdAt,
+          updatedAt: productsTable.updatedAt,
+        })
         .from(productsTable)
+        .innerJoin(
+          categoriesTable,
+          eq(productsTable.categoryId, categoriesTable.id)
+        )
         .where(eq(productsTable.id, id));
 
       return {
