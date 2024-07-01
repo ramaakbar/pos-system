@@ -8,6 +8,7 @@ import { DataTable } from "@/components/ui/table/data-table";
 import TableSkeleton from "@/components/ui/table/table-skeleton";
 import { client } from "@/lib/client";
 
+import CartSection from "./_cart/cartSection";
 import { columns } from "./_products/columns";
 
 export default function Home() {
@@ -27,17 +28,20 @@ export default function Home() {
 
   return (
     <div className="max-height-screen grid size-full grid-cols-12">
-      <div className="max-height-screen col-span-8 flex h-full flex-col overflow-scroll">
+      <div className="max-height-screen col-span-8 flex h-full flex-col">
         <Heading variant="h2">Products</Heading>
         <Input className="mb-10 w-full" placeholder="Search" />
-        {!isPending && data ? (
-          <DataTable columns={columns} data={data.data} />
-        ) : (
-          <TableSkeleton col={4} row={10} />
-        )}
+        <div className="overflow-scroll">
+          {!isPending && data ? (
+            <DataTable columns={columns} data={data.data} />
+          ) : (
+            <TableSkeleton col={4} row={10} />
+          )}
+        </div>
       </div>
-      <div className="col-span-4 flex flex-col">
+      <div className="max-height-screen col-span-4 flex flex-col">
         <Heading variant="h2">Cart</Heading>
+        <CartSection />
       </div>
     </div>
   );
