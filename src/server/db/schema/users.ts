@@ -1,25 +1,18 @@
-import { sql } from "drizzle-orm";
-import {
-  mysqlEnum,
-  mysqlTable,
-  timestamp,
-  varchar,
-} from "drizzle-orm/mysql-core";
+import { pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-typebox";
 import { t, UnwrapSchema } from "elysia";
 
-export const usersTable = mysqlTable("users", {
+export const usersTable = pgTable("users", {
   id: varchar("id", { length: 255 }).primaryKey(),
   email: varchar("email", { length: 255 }).unique().notNull(),
   password: varchar("password", { length: 255 }).notNull(),
-  role: mysqlEnum("role", ["Admin", "Member"]).default("Member").notNull(),
-  createdAt: timestamp("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
+  role: text("role", {
+    enum: ["Admin", "Member"],
+  })
+    .default("Member")
     .notNull(),
-  updatedAt: timestamp("updated_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("modified_at").defaultNow().notNull(),
 });
 
 const userSchemaTemp = createSelectSchema(usersTable);

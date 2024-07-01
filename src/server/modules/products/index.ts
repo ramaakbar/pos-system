@@ -179,17 +179,17 @@ export const productsRoutes = new Elysia({
         );
       }
 
-      await db.insert(productsTable).values({
-        name,
-        categoryId,
-        price,
-        quantity,
-        description,
-        media: saveImage,
-      });
-
       const [product] = await db
-        .select({
+        .insert(productsTable)
+        .values({
+          name,
+          categoryId,
+          price,
+          quantity,
+          description,
+          media: saveImage,
+        })
+        .returning({
           id: productsTable.id,
           categoryId: productsTable.categoryId,
           name: productsTable.name,
@@ -200,13 +200,7 @@ export const productsRoutes = new Elysia({
           categoryName: categoriesTable.name,
           createdAt: productsTable.createdAt,
           updatedAt: productsTable.updatedAt,
-        })
-        .from(productsTable)
-        .innerJoin(
-          categoriesTable,
-          eq(productsTable.categoryId, categoriesTable.id)
-        )
-        .where(eq(productsTable.name, name));
+        });
 
       return {
         success: true,
@@ -249,7 +243,7 @@ export const productsRoutes = new Elysia({
         );
       }
 
-      await db
+      const [product] = await db
         .update(productsTable)
         .set({
           name,
@@ -259,10 +253,8 @@ export const productsRoutes = new Elysia({
           description,
           media: saveImage,
         })
-        .where(eq(productsTable.id, id));
-
-      const [product] = await db
-        .select({
+        .where(eq(productsTable.id, id))
+        .returning({
           id: productsTable.id,
           categoryId: productsTable.categoryId,
           name: productsTable.name,
@@ -273,13 +265,7 @@ export const productsRoutes = new Elysia({
           categoryName: categoriesTable.name,
           createdAt: productsTable.createdAt,
           updatedAt: productsTable.updatedAt,
-        })
-        .from(productsTable)
-        .innerJoin(
-          categoriesTable,
-          eq(productsTable.categoryId, categoriesTable.id)
-        )
-        .where(eq(productsTable.id, id));
+        });
 
       return {
         success: true,

@@ -1,18 +1,17 @@
-import { sql } from "drizzle-orm";
 import {
-  int,
-  mysqlTable,
+  integer,
+  pgTable,
   text,
   timestamp,
   varchar,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-typebox";
 import { t, UnwrapSchema } from "elysia";
 import { ulid } from "ulid";
 
 import { categoriesTable } from "./categories";
 
-export const productsTable = mysqlTable("products", {
+export const productsTable = pgTable("products", {
   id: varchar("id", { length: 255 })
     .primaryKey()
     .$defaultFn(() => ulid()),
@@ -22,15 +21,10 @@ export const productsTable = mysqlTable("products", {
   name: varchar("name", { length: 255 }).unique().notNull(),
   description: text("description"),
   media: varchar("media", { length: 255 }),
-  price: int("price").notNull(),
-  quantity: int("quantity").notNull(),
-  createdAt: timestamp("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
+  price: integer("price").notNull(),
+  quantity: integer("quantity").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("modified_at").defaultNow().notNull(),
 });
 
 export const productSchema = t.Object({

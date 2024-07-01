@@ -1,12 +1,11 @@
-import { sql } from "drizzle-orm";
 import {
   date,
-  int,
-  mysqlEnum,
-  mysqlTable,
+  integer,
+  pgTable,
+  text,
   timestamp,
   varchar,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-typebox";
 import { t, UnwrapSchema } from "elysia";
 import { ulid } from "ulid";
@@ -14,38 +13,29 @@ import { ulid } from "ulid";
 import { customerSchema, customersTable } from "./customers";
 import { productSchema, productsTable } from "./products";
 
-export const headerTransactionsTable = mysqlTable("headerTransactions", {
+export const headerTransactionsTable = pgTable("headerTransactions", {
   id: varchar("id", { length: 255 })
     .primaryKey()
     .$defaultFn(() => ulid()),
   customerId: varchar("customer_id", { length: 255 }).references(
     () => customersTable.id
   ),
-  status: mysqlEnum("status", [
-    "waiting for payment",
-    "paid",
-    "done",
-  ]).notNull(),
-  paymentMethod: mysqlEnum("payment_method", [
-    "cash",
-    "transfer",
-    "qris",
-  ]).notNull(),
-  amount: int("amount").notNull(),
+  status: text("status", {
+    enum: ["waiting for payment", "paid", "done"],
+  }).notNull(),
+  paymentMethod: text("payment_method", {
+    enum: ["cash", "transfer", "qris"],
+  }).notNull(),
+  amount: integer("amount").notNull(),
   address: varchar("address", {
     length: 255,
   }),
   date: date("date"),
-  createdAt: timestamp("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("modified_at").defaultNow().notNull(),
 });
 
-export const detailTransactionsTable = mysqlTable("detailTransactions", {
+export const detailTransactionsTable = pgTable("detailTransactions", {
   id: varchar("id", { length: 255 })
     .primaryKey()
     .$defaultFn(() => ulid()),
@@ -55,15 +45,10 @@ export const detailTransactionsTable = mysqlTable("detailTransactions", {
   productId: varchar("product_id", { length: 255 })
     .notNull()
     .references(() => productsTable.id),
-  quantity: int("quantity").notNull(),
-  price: int("price").notNull(),
-  createdAt: timestamp("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
+  quantity: integer("quantity").notNull(),
+  price: integer("price").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("modified_at").defaultNow().notNull(),
 });
 
 export const transactionDetailSchema = t.Object({

@@ -1,10 +1,9 @@
-import { sql } from "drizzle-orm";
-import { mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-typebox";
 import { UnwrapSchema } from "elysia";
 import { ulid } from "ulid";
 
-export const customersTable = mysqlTable("customers", {
+export const customersTable = pgTable("customers", {
   id: varchar("id", { length: 255 })
     .primaryKey()
     .$defaultFn(() => ulid()),
@@ -16,13 +15,8 @@ export const customersTable = mysqlTable("customers", {
   email: varchar("email", {
     length: 255,
   }).unique(),
-  createdAt: timestamp("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("modified_at").defaultNow().notNull(),
 });
 
 export const customerSchema = createSelectSchema(customersTable);

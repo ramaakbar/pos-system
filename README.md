@@ -8,7 +8,7 @@
 cp .env.example .env
 ```
 
-- Create a database on your local mysql instance called `pos`.
+- Create a database on your local postgres instance called `pos`.
 - Then run the following commands:
 
 ```bash

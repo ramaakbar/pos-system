@@ -1,8 +1,8 @@
-import { datetime, mysqlTable, varchar } from "drizzle-orm/mysql-core";
+import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 
 import { usersTable } from "./users";
 
-export const sessionsTable = mysqlTable("sessions", {
+export const sessionsTable = pgTable("sessions", {
   id: varchar("id", {
     length: 255,
   }).primaryKey(),
@@ -11,5 +11,8 @@ export const sessionsTable = mysqlTable("sessions", {
   })
     .notNull()
     .references(() => usersTable.id),
-  expiresAt: datetime("expires_at").notNull(),
+  expiresAt: timestamp("expires_at", {
+    withTimezone: true,
+    mode: "date",
+  }).notNull(),
 });

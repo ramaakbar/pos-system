@@ -5,12 +5,9 @@ import { serverEnvs } from "@/env/server";
 export default {
   schema: "./src/server/db/schema/*",
   out: "./src/server/db/migrations",
-  dialect: "mysql",
+  dialect: "postgresql",
   breakpoints: true,
   dbCredentials: {
-    host: serverEnvs.DB_HOST,
-    port: serverEnvs.DB_PORT,
-    user: serverEnvs.DB_USER,
-    database: serverEnvs.DB_DATABASE,
+    url: serverEnvs.DB_URL,
   },
 } satisfies Config;
