@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { client } from "@/lib/client";
-import { Routes } from "@/lib/routes";
+import { Main } from "@/routes";
 import { loginDtoSchema } from "@/server/modules/auth/schema";
 
 export function RegisterForm() {
@@ -47,7 +47,7 @@ export function RegisterForm() {
       return data;
     },
     onSuccess: async () => {
-      push(Routes.home());
+      push(Main());
     },
   });
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { DefaultError, useMutation } from "@tanstack/react-query";
 import { UnwrapSchema } from "elysia";
@@ -18,11 +17,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { client } from "@/lib/client";
-import { Routes } from "@/lib/routes";
+import { Main } from "@/routes";
+import { usePush } from "@/routes/hooks";
 import { loginDtoSchema } from "@/server/modules/auth/schema";
 
 export function LoginForm() {
-  const { push } = useRouter();
+  const pushToMain = usePush(Main);
 
   const form = useForm<UnwrapSchema<typeof loginDtoSchema>>({
     resolver: typeboxResolver(loginDtoSchema),
@@ -47,7 +47,7 @@ export function LoginForm() {
       return data;
     },
     onSuccess: async () => {
-      push(Routes.home());
+      pushToMain({});
     },
   });
 

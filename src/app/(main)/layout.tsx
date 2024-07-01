@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { Routes } from "@/lib/routes";
+import { AuthLogin } from "@/routes";
 
 import { getUser } from "../actions";
 import BottomNav from "./bottomNav";
@@ -13,7 +13,7 @@ export default async function MainLayout({
   const user = await getUser();
 
   if (!user) {
-    throw redirect(Routes.login());
+    throw redirect(AuthLogin());
   }
 
   return (

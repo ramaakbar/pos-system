@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Home, Inbox, Loader2, Settings, UserRound } from "lucide-react";
 
@@ -15,8 +15,9 @@ import {
 } from "@/components/ui/drawer";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
-import { Routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { AuthLogin, Main } from "@/routes";
+import { usePush } from "@/routes/hooks";
 import { User } from "@/server/db/schema/users";
 
 type Props = {
@@ -25,7 +26,7 @@ type Props = {
 
 export default function BottomNav({ user }: Props) {
   const pathName = usePathname();
-  const { push } = useRouter();
+  const pushToLogin = usePush(AuthLogin);
 
   // interface Route {
   //   name: string;
@@ -44,7 +45,7 @@ export default function BottomNav({ user }: Props) {
   const routeLinks = [
     {
       name: "Home",
-      href: Routes.home(),
+      href: Main(),
       icon: Home,
     },
     {
@@ -69,7 +70,7 @@ export default function BottomNav({ user }: Props) {
       return data;
     },
     onSuccess: async () => {
-      push(Routes.login());
+      pushToLogin({});
     },
   });
 

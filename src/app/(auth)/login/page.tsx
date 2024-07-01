@@ -5,20 +5,20 @@ import { ChevronRight } from "lucide-react";
 import { getUser } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
-import { Routes } from "@/lib/routes";
+import { AuthRegister, Main } from "@/routes";
 
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage() {
   const user = await getUser();
 
-  if (user) throw redirect(Routes.home());
+  if (user) throw redirect(Main());
 
   return (
     <div className="flex h-full items-center justify-center">
       <div className="absolute right-0 top-0 p-4">
         <Button variant={"ghost"} asChild={true}>
-          <Link href={Routes.register()}>
+          <Link href={AuthRegister()}>
             Register <ChevronRight className="size-4" />
           </Link>
         </Button>
