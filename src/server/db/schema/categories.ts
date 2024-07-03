@@ -3,10 +3,15 @@ import { createSelectSchema } from "drizzle-typebox";
 import { UnwrapSchema } from "elysia";
 import { ulid } from "ulid";
 
+import { generateCode } from "@/server/lib/utils";
+
 export const categoriesTable = pgTable("categories", {
   id: varchar("id", { length: 255 })
     .primaryKey()
     .$defaultFn(() => ulid()),
+  code: varchar("code", { length: 125 })
+    .unique()
+    .$defaultFn(() => generateCode("CAT")),
   name: varchar("name", {
     length: 255,
   })

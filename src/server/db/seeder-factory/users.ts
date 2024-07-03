@@ -11,7 +11,7 @@ async function userFactory() {
     to: "2024-01-31T00:00:00.000Z",
   });
 
-  const userObj: typeof usersTable.$inferSelect = {
+  const userObj: typeof usersTable.$inferInsert = {
     id: faker.string.numeric(15),
     email: faker.internet.email({ firstName, lastName }),
     password: await Bun.password.hash("password"),

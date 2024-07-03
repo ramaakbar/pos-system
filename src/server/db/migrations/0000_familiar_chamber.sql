@@ -1,23 +1,28 @@
 CREATE TABLE IF NOT EXISTS "categories" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"code" varchar(125),
 	"name" varchar(255) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"modified_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "categories_code_unique" UNIQUE("code"),
 	CONSTRAINT "categories_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "customers" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"code" varchar(125),
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255),
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"modified_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "customers_code_unique" UNIQUE("code"),
 	CONSTRAINT "customers_name_unique" UNIQUE("name"),
 	CONSTRAINT "customers_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "products" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"code" varchar(125),
 	"category_id" varchar(255) NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"description" text,
@@ -26,6 +31,7 @@ CREATE TABLE IF NOT EXISTS "products" (
 	"quantity" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"modified_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "products_code_unique" UNIQUE("code"),
 	CONSTRAINT "products_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
@@ -47,6 +53,7 @@ CREATE TABLE IF NOT EXISTS "detailTransactions" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "headerTransactions" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"code" varchar(125),
 	"customer_id" varchar(255),
 	"status" text NOT NULL,
 	"payment_method" text NOT NULL,
@@ -54,7 +61,8 @@ CREATE TABLE IF NOT EXISTS "headerTransactions" (
 	"address" varchar(255),
 	"date" date,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"modified_at" timestamp DEFAULT now() NOT NULL
+	"modified_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "headerTransactions_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (

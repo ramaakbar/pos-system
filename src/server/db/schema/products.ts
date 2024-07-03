@@ -9,12 +9,17 @@ import { createSelectSchema } from "drizzle-typebox";
 import { t, UnwrapSchema } from "elysia";
 import { ulid } from "ulid";
 
+import { generateCode } from "@/server/lib/utils";
+
 import { categoriesTable } from "./categories";
 
 export const productsTable = pgTable("products", {
   id: varchar("id", { length: 255 })
     .primaryKey()
     .$defaultFn(() => ulid()),
+  code: varchar("code", { length: 125 })
+    .unique()
+    .$defaultFn(() => generateCode("PRD")),
   categoryId: varchar("category_id", { length: 255 })
     .notNull()
     .references(() => categoriesTable.id),

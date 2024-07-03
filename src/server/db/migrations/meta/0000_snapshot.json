@@ -1,5 +1,5 @@
 {
-  "id": "2edf67e1-67d5-4f89-81f8-95a2fcafb545",
+  "id": "de2181a9-6510-45d0-96d0-e6cd72c180ea",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -13,6 +13,12 @@
           "type": "varchar(255)",
           "primaryKey": true,
           "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(125)",
+          "primaryKey": false,
+          "notNull": false
         },
         "name": {
           "name": "name",
@@ -39,6 +45,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "categories_code_unique": {
+          "name": "categories_code_unique",
+          "nullsNotDistinct": false,
+          "columns": ["code"]
+        },
         "categories_name_unique": {
           "name": "categories_name_unique",
           "nullsNotDistinct": false,
@@ -55,6 +66,12 @@
           "type": "varchar(255)",
           "primaryKey": true,
           "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(125)",
+          "primaryKey": false,
+          "notNull": false
         },
         "name": {
           "name": "name",
@@ -87,6 +104,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "customers_code_unique": {
+          "name": "customers_code_unique",
+          "nullsNotDistinct": false,
+          "columns": ["code"]
+        },
         "customers_name_unique": {
           "name": "customers_name_unique",
           "nullsNotDistinct": false,
@@ -108,6 +130,12 @@
           "type": "varchar(255)",
           "primaryKey": true,
           "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(125)",
+          "primaryKey": false,
+          "notNull": false
         },
         "category_id": {
           "name": "category_id",
@@ -174,6 +202,11 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "products_code_unique": {
+          "name": "products_code_unique",
+          "nullsNotDistinct": false,
+          "columns": ["code"]
+        },
         "products_name_unique": {
           "name": "products_name_unique",
           "nullsNotDistinct": false,
@@ -302,6 +335,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "code": {
+          "name": "code",
+          "type": "varchar(125)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "customer_id": {
           "name": "customer_id",
           "type": "varchar(255)",
@@ -366,7 +405,13 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "headerTransactions_code_unique": {
+          "name": "headerTransactions_code_unique",
+          "nullsNotDistinct": false,
+          "columns": ["code"]
+        }
+      }
     },
     "public.users": {
       "name": "users",

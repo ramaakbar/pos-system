@@ -59,6 +59,7 @@ export const transactionsRoutes = new Elysia({
       const transactions = await db
         .select({
           id: headerTransactionsTable.id,
+          code: headerTransactionsTable.code,
           status: headerTransactionsTable.status,
           paymentMethod: headerTransactionsTable.paymentMethod,
           amount: headerTransactionsTable.amount,

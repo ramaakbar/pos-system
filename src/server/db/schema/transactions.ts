@@ -10,6 +10,8 @@ import { createSelectSchema } from "drizzle-typebox";
 import { t, UnwrapSchema } from "elysia";
 import { ulid } from "ulid";
 
+import { generateCode } from "@/server/lib/utils";
+
 import { customerSchema, customersTable } from "./customers";
 import { productSchema, productsTable } from "./products";
 
@@ -17,6 +19,9 @@ export const headerTransactionsTable = pgTable("headerTransactions", {
   id: varchar("id", { length: 255 })
     .primaryKey()
     .$defaultFn(() => ulid()),
+  code: varchar("code", { length: 125 })
+    .unique()
+    .$defaultFn(() => generateCode("TX")),
   customerId: varchar("customer_id", { length: 255 }).references(
     () => customersTable.id
   ),

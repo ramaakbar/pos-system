@@ -11,7 +11,7 @@ function productFactory(ctg: Array<typeof categoriesTable.$inferSelect>) {
     to: "2024-01-31T00:00:00.000Z",
   });
 
-  const productObj: Omit<typeof productsTable.$inferSelect, "id"> = {
+  const productObj: typeof productsTable.$inferInsert = {
     name: faker.commerce.productName(),
     categoryId: ctg[randomInt(ctg.length)].id,
     description: faker.commerce.productDescription(),

@@ -65,6 +65,7 @@ export const productsRoutes = new Elysia({
       const products = await db
         .select({
           id: productsTable.id,
+          code: productsTable.code,
           categoryId: productsTable.categoryId,
           name: productsTable.name,
           description: productsTable.description,
@@ -116,6 +117,7 @@ export const productsRoutes = new Elysia({
       const [product] = await db
         .select({
           id: productsTable.id,
+          code: productsTable.code,
           categoryId: productsTable.categoryId,
           name: productsTable.name,
           description: productsTable.description,
@@ -191,6 +193,7 @@ export const productsRoutes = new Elysia({
         })
         .returning({
           id: productsTable.id,
+          code: productsTable.code,
           categoryId: productsTable.categoryId,
           name: productsTable.name,
           description: productsTable.description,
@@ -256,6 +259,7 @@ export const productsRoutes = new Elysia({
         .where(eq(productsTable.id, id))
         .returning({
           id: productsTable.id,
+          code: productsTable.code,
           categoryId: productsTable.categoryId,
           name: productsTable.name,
           description: productsTable.description,

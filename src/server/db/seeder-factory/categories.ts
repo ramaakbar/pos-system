@@ -9,7 +9,7 @@ function categoryFactory() {
     to: "2024-01-31T00:00:00.000Z",
   });
 
-  const categoryObj: Omit<typeof categoriesTable.$inferSelect, "id"> = {
+  const categoryObj: typeof categoriesTable.$inferInsert = {
     name: faker.word.adjective(),
     createdAt: date,
     updatedAt: date,
@@ -25,7 +25,10 @@ export async function categorySeeder({
 }) {
   await Promise.all(
     [...Array(count)].map(async () => {
-      await tx.insert(categoriesTable).values(categoryFactory());
+      await tx
+        .insert(categoriesTable)
+        .values(categoryFactory())
+        .returning({ id: categoriesTable.id, code: categoriesTable.code });
     })
   );
 }
