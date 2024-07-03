@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { AuthLogin } from "@/routes";
 
 import { getUser } from "../actions";
-import BottomNav from "./bottomNav";
+import BottomNav from "./bottom-nav";
 
 export default async function MainLayout({
   children,

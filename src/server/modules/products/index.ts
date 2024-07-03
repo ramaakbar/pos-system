@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { asc, count, desc, eq, like, SQL } from "drizzle-orm";
+import { asc, count, desc, eq, ilike, SQL } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { db } from "@/server/db";
@@ -31,7 +31,7 @@ export const productsRoutes = new Elysia({
       const { search, sort, order, page = 1, limit = 20 } = query;
 
       const filter: SQL | undefined = search
-        ? like(productsTable.name, `%${search}%`)
+        ? ilike(productsTable.name, `%${search}%`)
         : undefined;
 
       const productsQuery = db.select().from(productsTable).where(filter);

@@ -102,7 +102,7 @@ export default function BottomNav({ user }: Props) {
             </Button>
           </DrawerTrigger>
           <DrawerContent>
-            <div className="mx-auto w-full max-w-sm">
+            <div className="mx-auto flex w-full max-w-md flex-col overflow-auto rounded-t-[10px] p-4">
               <DrawerHeader>
                 <DrawerTitle>Setting</DrawerTitle>
               </DrawerHeader>

@@ -9,9 +9,10 @@ import { client } from "@/lib/client";
 import { Main } from "@/routes";
 import { useSearchParams } from "@/routes/hooks";
 
-import CartSection from "./_cart/cartSection";
+import CartDrawer from "./_cart/cart-drawer";
+import CartSection from "./_cart/cart-section";
 import { columns } from "./_products/columns";
-import SearchProduct from "./_products/searchProduct";
+import SearchProduct from "./_products/search-product";
 
 export default function Home() {
   const searchQuery = useSearchParams(Main).search || "";
@@ -33,8 +34,8 @@ export default function Home() {
   });
 
   return (
-    <div className="max-height-screen grid size-full grid-cols-12">
-      <div className="max-height-screen col-span-8 flex h-full flex-col">
+    <div className="max-height-screen relative grid size-full grid-cols-12">
+      <div className="max-height-screen col-span-12 flex h-full flex-col md:col-span-8">
         <Heading variant="h2">Products</Heading>
         <SearchProduct searchQuery={searchQuery} />
         <div className="overflow-scroll">
@@ -44,8 +45,11 @@ export default function Home() {
             <TableSkeleton col={4} row={10} />
           )}
         </div>
+        <div className="block p-4 md:hidden">
+          <CartDrawer />
+        </div>
       </div>
-      <div className="max-height-screen col-span-4 flex flex-col">
+      <div className="max-height-screen col-span-4 hidden flex-col md:flex">
         <Heading variant="h2">Cart</Heading>
         <CartSection />
       </div>

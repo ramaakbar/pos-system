@@ -15,9 +15,13 @@ const insertTransactionDetailSchema = createInsertSchema(
 );
 
 export const createTransactionDtoSchema = t.Object({
-  ...t.Omit(insertTransactionHeaderSchema, ["createdAt", "updatedAt"])
+  ...t.Omit(insertTransactionHeaderSchema, ["createdAt", "updatedAt", "amount"])
     .properties,
   detail: t.Array(
-    t.Omit(insertTransactionDetailSchema, ["createdAt", "updatedAt"])
+    t.Omit(insertTransactionDetailSchema, [
+      "createdAt",
+      "updatedAt",
+      "transactionId",
+    ])
   ),
 });

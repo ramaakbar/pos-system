@@ -16,6 +16,7 @@ export const docs = () =>
         { name: "Auth", description: "Authentication endpoints" },
         { name: "Categories", description: "Categories endpoints" },
         { name: "Products", description: "Products endpoints" },
+        { name: "Transaction", description: "Transaction endpoints" },
       ],
     },
   });

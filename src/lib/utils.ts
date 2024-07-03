@@ -14,3 +14,15 @@ export function getBaseUrl() {
     return `http://${clientEnvs.NEXT_PUBLIC_DOMAIN}`;
   return `https://${clientEnvs.NEXT_PUBLIC_DOMAIN}`;
 }
+
+export const numberToRupiah = (val: number): string => {
+  const formatter = new Intl.NumberFormat(
+    new Intl.NumberFormat().resolvedOptions().locale,
+    {
+      style: "currency",
+      currency: "IDR",
+    }
+  );
+
+  return formatter.format(val);
+};

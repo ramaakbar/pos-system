@@ -9,6 +9,7 @@ import { docs } from "./lib/docs";
 import { authRoutes } from "./modules/auth";
 import { categoriesRoute } from "./modules/categories";
 import { productsRoutes } from "./modules/products";
+import { transactionsRoutes } from "./modules/transactions";
 
 const app = new Elysia({
   prefix: "/api",
@@ -70,7 +71,12 @@ const app = new Elysia({
         ...errorResponses,
       },
     },
-    (app) => app.use(authRoutes).use(categoriesRoute).use(productsRoutes)
+    (app) =>
+      app
+        .use(authRoutes)
+        .use(categoriesRoute)
+        .use(productsRoutes)
+        .use(transactionsRoutes)
   );
 
 export { app };

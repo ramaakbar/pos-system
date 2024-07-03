@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/server/db/schema/products";
 
-import { useCartStore } from "../_cart/cartStore";
+import { useCartStore } from "../_cart/useCartStore";
 
 export const columns: ColumnDef<Product>[] = [
   {

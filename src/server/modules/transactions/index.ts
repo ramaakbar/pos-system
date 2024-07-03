@@ -3,6 +3,7 @@ import Elysia from "elysia";
 
 import { db } from "@/server/db";
 import { customersTable } from "@/server/db/schema/customers";
+import { productsTable } from "@/server/db/schema/products";
 import {
   detailTransactionsTable,
   headerTransactionsTable,
@@ -103,42 +104,64 @@ export const transactionsRoutes = new Elysia({
   )
   .post(
     "/",
-    async ({ body }) => {
+    async ({ body, set }) => {
       let amountTemp = body.detail.reduce(
         (acc, curr) => (acc = acc + curr.price * curr.quantity),
         0
       );
 
       await db.transaction(async (tx) => {
-        await tx.insert(headerTransactionsTable).values({
-          customerId: body.customerId,
-          status: body.status,
-          paymentMethod: body.paymentMethod,
-          amount: amountTemp,
-          address: body.address,
-          date: body.date,
+        const stockCheckPromises = body.detail.map(async (val) => {
+          const [product] = await tx
+            .select({
+              quantity: productsTable.quantity,
+              name: productsTable.name,
+            })
+            .from(productsTable)
+            .where(eq(productsTable.id, val.productId));
+
+          if (product.quantity < val.quantity) {
+            throw new Error(
+              `Insufficient stock for product ${val.productId} - ${product.name}`
+            );
+          }
+
+          await tx
+            .update(productsTable)
+            .set({
+              quantity: product.quantity - val.quantity,
+            })
+            .where(eq(productsTable.id, val.productId));
         });
 
-        body.detail.map(
-          async (val) =>
-            await db.insert(detailTransactionsTable).values({
-              transactionId: "asdsad",
-              productId: val.productId,
-              quantity: val.quantity,
-              price: val.price,
-            })
+        await Promise.all(stockCheckPromises);
+
+        const [{ id }] = await tx
+          .insert(headerTransactionsTable)
+          .values({
+            customerId: body.customerId,
+            status: body.status,
+            paymentMethod: body.paymentMethod,
+            amount: amountTemp,
+            address: body.address,
+            date: body.date,
+          })
+          .returning({
+            id: headerTransactionsTable.id,
+          });
+
+        await Promise.all(
+          body.detail.map(
+            async (val) =>
+              await tx.insert(detailTransactionsTable).values({
+                transactionId: id,
+                productId: val.productId,
+                quantity: val.quantity,
+                price: val.price,
+              })
+          )
         );
       });
-
-      body.detail.forEach(
-        async (val) =>
-          await db.insert(detailTransactionsTable).values({
-            transactionId: "sadsa",
-            productId: val.productId,
-            quantity: val.quantity,
-            price: val.price,
-          })
-      );
 
       return {
         success: true,
