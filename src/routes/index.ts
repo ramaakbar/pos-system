@@ -4,6 +4,7 @@ import { z } from "zod";
 import * as AuthLoginRoute from "@/app/(auth)/login/page.info";
 import * as AuthRegisterRoute from "@/app/(auth)/register/page.info";
 import * as MainRoute from "@/app/(main)/page.info";
+import * as MainTransactionsRoute from "@/app/(main)/transactions/page.info";
 import * as ApiEndpointRoute from "@/app/api/[...endpoint]/route.info";
 import * as DashboardRoute from "@/app/dashboard/page.info";
 
@@ -24,6 +25,10 @@ export const AuthRegister = makeRoute("/(auth)/register", {
 export const Main = makeRoute("/(main)", {
   ...defaultInfo,
   ...MainRoute.Route,
+});
+export const MainTransactions = makeRoute("/(main)/transactions", {
+  ...defaultInfo,
+  ...MainTransactionsRoute.Route,
 });
 export const ApiEndpoint = makeRoute("/api/[...endpoint]", {
   ...defaultInfo,

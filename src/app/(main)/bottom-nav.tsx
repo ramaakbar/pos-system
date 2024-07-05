@@ -16,7 +16,7 @@ import {
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
 import { cn } from "@/lib/utils";
-import { AuthLogin, Main } from "@/routes";
+import { AuthLogin, Main, MainTransactions } from "@/routes";
 import { usePush } from "@/routes/hooks";
 import { User } from "@/server/db/schema/users";
 
@@ -41,7 +41,6 @@ export default function BottomNav({ user }: Props) {
   // };
 
   // const routeLinks = getRouteLinks(Routes);
-
   const routeLinks = [
     {
       name: "Home",
@@ -49,8 +48,8 @@ export default function BottomNav({ user }: Props) {
       icon: Home,
     },
     {
-      name: "Orders",
-      href: "/order",
+      name: "Transactions",
+      href: MainTransactions(),
       icon: Inbox,
     },
     {
@@ -83,10 +82,7 @@ export default function BottomNav({ user }: Props) {
               variant="ghost"
               className={cn(
                 "flex h-auto flex-col capitalize",
-                pathName?.startsWith(route.href) ||
-                  (index === 0 && pathName === "/")
-                  ? "text-blue-600"
-                  : ""
+                pathName === route.href ? "text-blue-600" : ""
               )}
             >
               <route.icon className="size-5" />

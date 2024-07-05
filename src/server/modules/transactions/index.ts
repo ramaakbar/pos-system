@@ -1,4 +1,4 @@
-import { asc, count, desc, eq } from "drizzle-orm";
+import { asc, count, desc, eq, ilike, SQL } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { db } from "@/server/db";
@@ -28,11 +28,20 @@ export const transactionsRoutes = new Elysia({
   .get(
     "/",
     async ({ query, set }) => {
-      const { search, sort, order, page = 1, limit = 20 } = query;
+      const { search, sort, order, page = 1, limit = 10 } = query;
+
+      const filter: SQL | undefined = search
+        ? ilike(headerTransactionsTable.code, `%${search}%`)
+        : undefined;
+
+      const transactionQuery = db
+        .select()
+        .from(headerTransactionsTable)
+        .where(filter);
 
       const [{ total }] = await db
         .select({ total: count() })
-        .from(headerTransactionsTable);
+        .from(transactionQuery.as("transactions"));
 
       const pageCount = Math.ceil(total / Number(limit));
 
@@ -70,7 +79,7 @@ export const transactionsRoutes = new Elysia({
           createdAt: headerTransactionsTable.createdAt,
           updatedAt: headerTransactionsTable.updatedAt,
         })
-        .from(headerTransactionsTable)
+        .from(transactionQuery.as("headerTransactions"))
         .leftJoin(
           customersTable,
           eq(headerTransactionsTable.customerId, customersTable.id)
@@ -117,13 +126,15 @@ export const transactionsRoutes = new Elysia({
             .select({
               quantity: productsTable.quantity,
               name: productsTable.name,
+              code: productsTable.code,
             })
             .from(productsTable)
             .where(eq(productsTable.id, val.productId));
 
           if (product.quantity < val.quantity) {
+            set.status = "Bad Request";
             throw new Error(
-              `Insufficient stock for product ${val.productId} - ${product.name}`
+              `Insufficient stock for product ${product.code} - ${product.name}`
             );
           }
 
@@ -137,10 +148,24 @@ export const transactionsRoutes = new Elysia({
 
         await Promise.all(stockCheckPromises);
 
+        let [customer] = await tx
+          .select()
+          .from(customersTable)
+          .where(ilike(customersTable.name, body.customer));
+
+        if (!customer) {
+          [customer] = await tx
+            .insert(customersTable)
+            .values({
+              name: body.customer,
+            })
+            .returning();
+        }
+
         const [{ id }] = await tx
           .insert(headerTransactionsTable)
           .values({
-            customerId: body.customerId,
+            customerId: customer.id,
             status: body.status,
             paymentMethod: body.paymentMethod,
             amount: amountTemp,
