@@ -12,8 +12,6 @@ type Props = {};
 export default function CartSection({}: Props) {
   const items = useStore(useCartStore, (state) => state.items);
   const getTotalPrice = useCartStore((state) => state.getTotalPrice);
-  const incrementQuantity = useCartStore((state) => state.incrementQuantity);
-  const decrementQuantity = useCartStore((state) => state.decrementQuantity);
 
   const totalPrice = items ? numberToRupiah(getTotalPrice()) : 0;
 

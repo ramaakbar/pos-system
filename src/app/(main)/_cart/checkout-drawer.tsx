@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { DefaultError, useMutation } from "@tanstack/react-query";
 import { t, UnwrapSchema } from "elysia";
@@ -36,10 +37,15 @@ type Props = {
 };
 
 export default function CheckoutDrawer({ items }: Props) {
+  const [open, setOpen] = useState(false);
+
   const removeAllItem = useCartStore((state) => state.removeAllItem);
 
   const formTransactionSchema = t.Object({
-    customer: t.String(),
+    customer: t.String({
+      minLength: 1,
+      error: "Customer is required",
+    }),
     address: t.String(),
     date: t.String(),
   });
@@ -72,7 +78,9 @@ export default function CheckoutDrawer({ items }: Props) {
       queryClient.invalidateQueries({
         queryKey: ["products"],
       });
-      toast.success("success");
+      form.reset();
+      toast.success("Transaction Completed");
+      setOpen(false);
     },
   });
 
@@ -83,8 +91,9 @@ export default function CheckoutDrawer({ items }: Props) {
       toast.error("cart is empty");
       return;
     }
-    console.log({
-      customerId: formData.customer,
+
+    mutate({
+      customer: formData.customer,
       address: formData.address,
       paymentMethod: "transfer",
       status: "paid",
@@ -95,23 +104,10 @@ export default function CheckoutDrawer({ items }: Props) {
         quantity: val.quantity,
       })),
     });
-    // mutate({
-    //   customerId: formData.customer,
-    //   address: formData.address,
-    //   paymentMethod: "transfer",
-    //   status: "paid",
-    //   // date: new Date().toISOString(),
-    //   date: formData.date,
-    //   detail: items.map((val) => ({
-    //     productId: val.product.id,
-    //     price: val.product.price,
-    //     quantity: val.quantity,
-    //   })),
-    // });
   };
 
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="default" className="w-full">
           Checkout
