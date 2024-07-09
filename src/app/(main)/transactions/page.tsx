@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
@@ -55,7 +56,13 @@ export default function Page() {
               key={transaction.id}
               className="col-span-12 rounded-lg border p-4 shadow-sm md:col-span-6"
             >
-              <Heading variant={"h3"}>{transaction.code}</Heading>
+              <div className="flex justify-between">
+                <Heading variant={"h3"}>{transaction.code}</Heading>
+                <div className="flex gap-2">
+                  <Badge>{transaction.transactionStatus}</Badge>
+                  <Badge>{transaction.paymentStatus}</Badge>
+                </div>
+              </div>
               <div>
                 <Text>{transaction.customer?.name}</Text>
                 <Text>{numberToRupiah(transaction.amount)}</Text>

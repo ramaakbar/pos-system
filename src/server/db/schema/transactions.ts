@@ -25,8 +25,11 @@ export const headerTransactionsTable = pgTable("headerTransactions", {
   customerId: varchar("customer_id", { length: 255 }).references(
     () => customersTable.id
   ),
-  status: text("status", {
-    enum: ["waiting for payment", "paid", "done"],
+  transactionStatus: text("transaction_status", {
+    enum: ["Canceled", "In Progress", "Done"],
+  }).notNull(),
+  paymentStatus: text("payment_status", {
+    enum: ["Not Paid", "Paid"],
   }).notNull(),
   paymentMethod: text("payment_method", {
     enum: ["cash", "transfer", "qris"],

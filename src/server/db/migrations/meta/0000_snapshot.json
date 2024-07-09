@@ -1,5 +1,5 @@
 {
-  "id": "de2181a9-6510-45d0-96d0-e6cd72c180ea",
+  "id": "664e86ec-473a-4d84-8801-8fc1bd7dfcff",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -159,7 +159,7 @@
           "name": "media",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "price": {
           "name": "price",
@@ -347,8 +347,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "status": {
-          "name": "status",
+        "transaction_status": {
+          "name": "transaction_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payment_status": {
+          "name": "payment_status",
           "type": "text",
           "primaryKey": false,
           "notNull": true

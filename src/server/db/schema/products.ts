@@ -25,7 +25,7 @@ export const productsTable = pgTable("products", {
     .references(() => categoriesTable.id),
   name: varchar("name", { length: 255 }).unique().notNull(),
   description: text("description"),
-  media: varchar("media", { length: 255 }),
+  media: varchar("media", { length: 255 }).notNull(),
   price: integer("price").notNull(),
   quantity: integer("quantity").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

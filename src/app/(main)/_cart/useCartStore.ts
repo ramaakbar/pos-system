@@ -21,6 +21,28 @@ type CartStore = {
   getTotalPrice: () => number;
 };
 
+const findItemIndex = (items: Item[], id: string) =>
+  items.findIndex((item) => item.id === id);
+
+const updateItemQuantity = (
+  items: Item[],
+  id: string,
+  amount: number,
+  maxQuantity: number
+) => {
+  return items.map((item) => {
+    if (item.id === id) {
+      const newQuantity = item.quantity + amount;
+      if (newQuantity > maxQuantity) {
+        toast.error("Quantity exceeded");
+        return item;
+      }
+      return { ...item, quantity: newQuantity };
+    }
+    return item;
+  });
+};
+
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
@@ -32,16 +54,23 @@ export const useCartStore = create<CartStore>()(
           );
 
           if (!foundItem) {
+            if (item.product.quantity === 0) {
+              toast.error("Item is Out of Stock");
+              return { ...item };
+            }
+
+            toast.success("Successfully add item to cart");
             return {
               items: [...state.items, { id: ulid(), ...item }],
             };
           }
 
           return {
-            items: state.items.map((val) =>
-              val.product.id === item.product.id
-                ? { ...val, quantity: val.quantity + 1 }
-                : val
+            items: updateItemQuantity(
+              state.items,
+              foundItem.id,
+              1,
+              foundItem.product.quantity
             ),
           };
         }),
@@ -55,15 +84,12 @@ export const useCartStore = create<CartStore>()(
         })),
       incrementQuantity: (id) =>
         set((state) => ({
-          items: state.items.map((item) => {
-            if (item.id === id && item.quantity + 1 > item.product.quantity) {
-              toast.error("Quantity exceeded");
-              return { ...item };
-            } else if (item.id !== id) {
-              return { ...item };
-            }
-            return { ...item, quantity: item.quantity + 1 };
-          }),
+          items: updateItemQuantity(
+            state.items,
+            id,
+            1,
+            state.items[findItemIndex(state.items, id)].product.quantity
+          ),
         })),
       decrementQuantity: (id) =>
         set((state) => ({

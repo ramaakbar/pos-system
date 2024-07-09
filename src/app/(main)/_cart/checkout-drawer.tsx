@@ -95,8 +95,9 @@ export default function CheckoutDrawer({ items }: Props) {
     mutate({
       customer: formData.customer,
       address: formData.address,
+      transactionStatus: "In Progress",
+      paymentStatus: "Not Paid",
       paymentMethod: "transfer",
-      status: "paid",
       date: formData.date,
       detail: items.map((val) => ({
         productId: val.product.id,

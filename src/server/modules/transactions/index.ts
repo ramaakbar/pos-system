@@ -69,7 +69,8 @@ export const transactionsRoutes = new Elysia({
         .select({
           id: headerTransactionsTable.id,
           code: headerTransactionsTable.code,
-          status: headerTransactionsTable.status,
+          transactionStatus: headerTransactionsTable.transactionStatus,
+          paymentStatus: headerTransactionsTable.paymentStatus,
           paymentMethod: headerTransactionsTable.paymentMethod,
           amount: headerTransactionsTable.amount,
           address: headerTransactionsTable.address,
@@ -166,7 +167,8 @@ export const transactionsRoutes = new Elysia({
           .insert(headerTransactionsTable)
           .values({
             customerId: customer.id,
-            status: body.status,
+            transactionStatus: body.transactionStatus,
+            paymentStatus: body.paymentStatus,
             paymentMethod: body.paymentMethod,
             amount: amountTemp,
             address: body.address,
