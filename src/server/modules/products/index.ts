@@ -4,7 +4,11 @@ import Elysia from "elysia";
 
 import { db } from "@/server/db";
 import { categoriesTable } from "@/server/db/schema/categories";
-import { productSchema, productsTable } from "@/server/db/schema/products";
+import {
+  productSchema,
+  productsTable,
+  returningProductSchema,
+} from "@/server/db/schema/products";
 import {
   successResponseWithDataSchema,
   successResponseWithPaginationSchema,
@@ -72,7 +76,7 @@ export const productsRoutes = new Elysia({
           media: productsTable.media,
           price: productsTable.price,
           quantity: productsTable.quantity,
-          categoryName: categoriesTable.name,
+          category: categoriesTable,
           createdAt: productsTable.createdAt,
           updatedAt: productsTable.updatedAt,
         })
@@ -124,7 +128,7 @@ export const productsRoutes = new Elysia({
           media: productsTable.media,
           price: productsTable.price,
           quantity: productsTable.quantity,
-          categoryName: categoriesTable.name,
+          category: categoriesTable,
           createdAt: productsTable.createdAt,
           updatedAt: productsTable.updatedAt,
         })
@@ -170,7 +174,7 @@ export const productsRoutes = new Elysia({
         throw new Error("Product already exists with the name");
       }
 
-      let saveImage = null;
+      let saveImage = "";
 
       if (media instanceof File) {
         saveImage = `${randomUUID()}.${media?.name.split(".")[1]}`;
@@ -200,7 +204,6 @@ export const productsRoutes = new Elysia({
           media: productsTable.media,
           price: productsTable.price,
           quantity: productsTable.quantity,
-          categoryName: categoriesTable.name,
           createdAt: productsTable.createdAt,
           updatedAt: productsTable.updatedAt,
         });
@@ -213,7 +216,7 @@ export const productsRoutes = new Elysia({
     {
       body: createProductDtoSchema,
       response: {
-        200: successResponseWithDataSchema(productSchema),
+        200: successResponseWithDataSchema(returningProductSchema),
       },
     }
   )
@@ -266,7 +269,6 @@ export const productsRoutes = new Elysia({
           media: productsTable.media,
           price: productsTable.price,
           quantity: productsTable.quantity,
-          categoryName: categoriesTable.name,
           createdAt: productsTable.createdAt,
           updatedAt: productsTable.updatedAt,
         });
@@ -280,7 +282,7 @@ export const productsRoutes = new Elysia({
       params: idParamSchema,
       body: updateProductDtoSchema,
       response: {
-        200: successResponseWithDataSchema(productSchema),
+        200: successResponseWithDataSchema(returningProductSchema),
       },
     }
   );

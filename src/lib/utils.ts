@@ -1,4 +1,5 @@
 import type { ClassValue } from "clsx";
+import { TLiteral, TUnion, Type } from "@sinclair/typebox";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -26,3 +27,16 @@ export const numberToRupiah = (val: number): string => {
 
   return formatter.format(val);
 };
+
+export type TLiteralUnion<
+  T extends string[],
+  Acc extends TLiteral[] = [],
+> = T extends [infer L extends string, ...infer R extends string[]]
+  ? TLiteralUnion<R, [...Acc, TLiteral<L>]>
+  : TUnion<Acc>;
+
+export function LiteralUnion<T extends string[]>(
+  values: readonly [...T]
+): TLiteralUnion<T> {
+  return Type.Union(values.map((value) => Type.Literal(value))) as never;
+}

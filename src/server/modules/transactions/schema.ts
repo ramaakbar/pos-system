@@ -1,9 +1,12 @@
 import { createInsertSchema } from "drizzle-typebox";
 import { t } from "elysia";
 
+import { LiteralUnion } from "@/lib/utils";
 import {
   detailTransactionsTable,
   headerTransactionsTable,
+  paymentStatusEnum,
+  transactionStatusEnum,
 } from "@/server/db/schema/transactions";
 
 const insertTransactionHeaderSchema = createInsertSchema(
@@ -32,4 +35,9 @@ export const createTransactionDtoSchema = t.Object({
       "transactionId",
     ])
   ),
+});
+
+export const updateTransactionStatusDtoSchema = t.Object({
+  transactionStatus: LiteralUnion(transactionStatusEnum),
+  paymentStatus: LiteralUnion(paymentStatusEnum),
 });

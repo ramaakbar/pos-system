@@ -11,7 +11,7 @@ import { ulid } from "ulid";
 
 import { generateCode } from "@/server/lib/utils";
 
-import { categoriesTable } from "./categories";
+import { categoriesTable, categorySchema } from "./categories";
 
 export const productsTable = pgTable("products", {
   id: varchar("id", { length: 255 })
@@ -34,7 +34,11 @@ export const productsTable = pgTable("products", {
 
 export const productSchema = t.Object({
   ...createSelectSchema(productsTable).properties,
-  categoryName: t.String(),
+  category: categorySchema,
+});
+
+export const returningProductSchema = t.Object({
+  ...createSelectSchema(productsTable).properties,
 });
 
 export type Product = UnwrapSchema<typeof productSchema>;

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import { numberToRupiah } from "@/lib/utils";
 import { MainTransactions } from "@/routes";
 import { useSearchParams } from "@/routes/hooks";
 
+import { TransactionDetailDrawer } from "./transaction-detail-drawer";
 import { TransactionPagination } from "./transaction-pagination";
 
 export default function Page() {
@@ -34,6 +36,7 @@ export default function Page() {
       return data;
     },
   });
+
   return (
     <div className="max-height-screen flex flex-col px-4 pt-4">
       <div className="mb-6 flex flex-col justify-between gap-6 md:flex-row">
@@ -52,11 +55,17 @@ export default function Page() {
         {!isLoading &&
           data &&
           data.data.map((transaction) => (
-            <div
+            <Link
+              href={MainTransactions(
+                {},
+                {
+                  transaction: transaction.id,
+                }
+              )}
               key={transaction.id}
               className="col-span-12 rounded-lg border p-4 shadow-sm md:col-span-6"
             >
-              <div className="flex justify-between">
+              <div className="flex flex-col lg:flex-row lg:justify-between">
                 <Heading variant={"h3"}>{transaction.code}</Heading>
                 <div className="flex gap-2">
                   <Badge>{transaction.transactionStatus}</Badge>
@@ -68,9 +77,10 @@ export default function Page() {
                 <Text>{numberToRupiah(transaction.amount)}</Text>
                 <Text>{new Date(transaction.createdAt).toDateString()}</Text>
               </div>
-            </div>
+            </Link>
           ))}
       </div>
+      {data && <TransactionDetailDrawer />}
       {data && (
         <TransactionPagination
           totalPages={data.pagination.pageCount}

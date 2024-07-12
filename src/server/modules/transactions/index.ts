@@ -2,21 +2,30 @@ import { asc, count, desc, eq, ilike, SQL } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { db } from "@/server/db";
+import { categoriesTable } from "@/server/db/schema/categories";
 import { customersTable } from "@/server/db/schema/customers";
 import { productsTable } from "@/server/db/schema/products";
 import {
   detailTransactionsTable,
   headerTransactionsTable,
   transactionHeaderSchema,
+  transactionSchema,
 } from "@/server/db/schema/transactions";
 import {
+  successResponseWithDataSchema,
   successResponseWithoutDataSchema,
   successResponseWithPaginationSchema,
 } from "@/server/lib/common-responses";
-import { paginationQuerySchema } from "@/server/lib/common-schemas";
+import {
+  idParamSchema,
+  paginationQuerySchema,
+} from "@/server/lib/common-schemas";
 import { ctx } from "@/server/plugins/context";
 
-import { createTransactionDtoSchema } from "./schema";
+import {
+  createTransactionDtoSchema,
+  updateTransactionStatusDtoSchema,
+} from "./schema";
 
 export const transactionsRoutes = new Elysia({
   prefix: "/transactions",
@@ -113,6 +122,82 @@ export const transactionsRoutes = new Elysia({
       },
     }
   )
+  .get(
+    "/:id",
+    // @ts-ignore
+    // ignore response schema
+    async ({ params, set }) => {
+      const id = params.id;
+
+      let [transactionHeader] = await db
+        .select({
+          id: headerTransactionsTable.id,
+          code: headerTransactionsTable.code,
+          amount: headerTransactionsTable.amount,
+          address: headerTransactionsTable.address,
+          customerId: headerTransactionsTable.customerId,
+          paymentMethod: headerTransactionsTable.paymentMethod,
+          paymentStatus: headerTransactionsTable.paymentStatus,
+          transactionStatus: headerTransactionsTable.transactionStatus,
+          customer: customersTable,
+          date: headerTransactionsTable.date,
+          createdAt: headerTransactionsTable.createdAt,
+          updatedAt: headerTransactionsTable.updatedAt,
+        })
+        .from(headerTransactionsTable)
+        .innerJoin(
+          customersTable,
+          eq(headerTransactionsTable.customerId, customersTable.id)
+        )
+        .where(eq(headerTransactionsTable.id, id));
+
+      if (!transactionHeader) {
+        set.status = "Bad Request";
+        throw new Error("Transaction not found");
+      }
+
+      const transactionDetail = await db
+        .select({
+          id: detailTransactionsTable.id,
+          transactionId: detailTransactionsTable.transactionId,
+          productId: detailTransactionsTable.productId,
+          quantity: detailTransactionsTable.quantity,
+          price: detailTransactionsTable.price,
+          product: {
+            ...productsTable,
+            category: { ...categoriesTable },
+          },
+          createdAt: detailTransactionsTable.createdAt,
+          updatedAt: detailTransactionsTable.updatedAt,
+        })
+        .from(detailTransactionsTable)
+        .innerJoin(
+          productsTable,
+          eq(detailTransactionsTable.productId, productsTable.id)
+        )
+        .innerJoin(
+          categoriesTable,
+          eq(productsTable.categoryId, categoriesTable.id)
+        )
+        .where(eq(detailTransactionsTable.transactionId, id));
+
+      const transaction = {
+        ...transactionHeader,
+        detail: transactionDetail,
+      };
+
+      return {
+        success: true,
+        data: transaction,
+      };
+    },
+    {
+      params: idParamSchema,
+      response: {
+        200: successResponseWithDataSchema(transactionSchema),
+      },
+    }
+  )
   .post(
     "/",
     async ({ body, set }) => {
@@ -197,6 +282,44 @@ export const transactionsRoutes = new Elysia({
     },
     {
       body: createTransactionDtoSchema,
+      response: {
+        200: successResponseWithoutDataSchema,
+      },
+    }
+  )
+  .patch(
+    "/:id",
+    async ({ params, body, set }) => {
+      const id = params.id;
+      const { transactionStatus, paymentStatus } = body;
+
+      let [transactionHeader] = await db
+        .select()
+        .from(headerTransactionsTable)
+
+        .where(eq(headerTransactionsTable.id, id));
+
+      if (!transactionHeader) {
+        set.status = "Bad Request";
+        throw new Error("Transaction not found");
+      }
+
+      await db
+        .update(headerTransactionsTable)
+        .set({
+          transactionStatus,
+          paymentStatus,
+        })
+        .where(eq(headerTransactionsTable.id, id))
+        .returning();
+
+      return {
+        success: true,
+      };
+    },
+    {
+      params: idParamSchema,
+      body: updateTransactionStatusDtoSchema,
       response: {
         200: successResponseWithoutDataSchema,
       },

@@ -15,6 +15,13 @@ import { generateCode } from "@/server/lib/utils";
 import { customerSchema, customersTable } from "./customers";
 import { productSchema, productsTable } from "./products";
 
+export const transactionStatusEnum = [
+  "Canceled",
+  "In Progress",
+  "Done",
+] as const;
+export const paymentStatusEnum = ["Not Paid", "Paid"] as const;
+
 export const headerTransactionsTable = pgTable("headerTransactions", {
   id: varchar("id", { length: 255 })
     .primaryKey()
@@ -26,10 +33,10 @@ export const headerTransactionsTable = pgTable("headerTransactions", {
     () => customersTable.id
   ),
   transactionStatus: text("transaction_status", {
-    enum: ["Canceled", "In Progress", "Done"],
+    enum: transactionStatusEnum,
   }).notNull(),
   paymentStatus: text("payment_status", {
-    enum: ["Not Paid", "Paid"],
+    enum: paymentStatusEnum,
   }).notNull(),
   paymentMethod: text("payment_method", {
     enum: ["cash", "transfer", "qris"],
@@ -72,3 +79,14 @@ export const transactionHeaderSchema = t.Object({
 });
 
 export type TransactionHeader = UnwrapSchema<typeof transactionHeaderSchema>;
+
+export const transactionSchema = t.Object({
+  ...transactionHeaderSchema.properties,
+  detail: t.Array(
+    t.Object({
+      ...transactionDetailSchema.properties,
+    })
+  ),
+});
+
+export type Transaction = UnwrapSchema<typeof transactionSchema>;
