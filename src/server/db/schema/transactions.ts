@@ -28,7 +28,8 @@ export const headerTransactionsTable = pgTable("headerTransactions", {
     .$defaultFn(() => ulid()),
   code: varchar("code", { length: 125 })
     .unique()
-    .$defaultFn(() => generateCode("TX")),
+    .$defaultFn(() => generateCode("TX"))
+    .notNull(),
   customerId: varchar("customer_id", { length: 255 }).references(
     () => customersTable.id
   ),

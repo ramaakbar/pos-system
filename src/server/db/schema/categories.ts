@@ -11,7 +11,8 @@ export const categoriesTable = pgTable("categories", {
     .$defaultFn(() => ulid()),
   code: varchar("code", { length: 125 })
     .unique()
-    .$defaultFn(() => generateCode("CAT")),
+    .$defaultFn(() => generateCode("CAT"))
+    .notNull(),
   name: varchar("name", {
     length: 255,
   })

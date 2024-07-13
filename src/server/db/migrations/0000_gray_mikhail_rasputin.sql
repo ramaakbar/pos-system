@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS "categories" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
-	"code" varchar(125),
+	"code" varchar(125) NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"modified_at" timestamp DEFAULT now() NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS "categories" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "customers" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
-	"code" varchar(125),
+	"code" varchar(125) NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255),
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS "customers" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "products" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
-	"code" varchar(125),
+	"code" varchar(125) NOT NULL,
 	"category_id" varchar(255) NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"description" text,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS "detailTransactions" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "headerTransactions" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
-	"code" varchar(125),
+	"code" varchar(125) NOT NULL,
 	"customer_id" varchar(255),
 	"transaction_status" text NOT NULL,
 	"payment_status" text NOT NULL,

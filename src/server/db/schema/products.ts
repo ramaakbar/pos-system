@@ -19,7 +19,8 @@ export const productsTable = pgTable("products", {
     .$defaultFn(() => ulid()),
   code: varchar("code", { length: 125 })
     .unique()
-    .$defaultFn(() => generateCode("PRD")),
+    .$defaultFn(() => generateCode("PRD"))
+    .notNull(),
   categoryId: varchar("category_id", { length: 255 })
     .notNull()
     .references(() => categoriesTable.id),
