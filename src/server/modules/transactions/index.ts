@@ -1,4 +1,4 @@
-import { asc, count, desc, eq, ilike, SQL } from "drizzle-orm";
+import { asc, count, desc, eq, getTableColumns, ilike, SQL } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { db } from "@/server/db";
@@ -20,6 +20,7 @@ import {
   idParamSchema,
   paginationQuerySchema,
 } from "@/server/lib/common-schemas";
+import { jsonBuildObject } from "@/server/lib/utils";
 import { ctx } from "@/server/plugins/context";
 
 import {
@@ -124,8 +125,6 @@ export const transactionsRoutes = new Elysia({
   )
   .get(
     "/:id",
-    // @ts-ignore
-    // ignore response schema
     async ({ params, set }) => {
       const id = params.id;
 
@@ -158,17 +157,13 @@ export const transactionsRoutes = new Elysia({
 
       const transactionDetail = await db
         .select({
-          id: detailTransactionsTable.id,
-          transactionId: detailTransactionsTable.transactionId,
-          productId: detailTransactionsTable.productId,
-          quantity: detailTransactionsTable.quantity,
-          price: detailTransactionsTable.price,
+          ...getTableColumns(detailTransactionsTable),
           product: {
-            ...productsTable,
-            category: { ...categoriesTable },
+            ...getTableColumns(productsTable),
+            category: jsonBuildObject({
+              ...getTableColumns(categoriesTable),
+            }),
           },
-          createdAt: detailTransactionsTable.createdAt,
-          updatedAt: detailTransactionsTable.updatedAt,
         })
         .from(detailTransactionsTable)
         .innerJoin(
