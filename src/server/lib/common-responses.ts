@@ -23,15 +23,16 @@ export const successResponseWithPaginationSchema = <T extends TSchema>(
     data: t.Array(schema),
   });
 
-export const errorResponseSchema = t.Object({
-  success: t.Boolean({ default: false }),
-  message: t.String(),
-});
+export const errorResponseSchema = (msg: string) =>
+  t.Object({
+    success: t.Boolean({ default: false }),
+    message: t.String({ default: msg }),
+  });
 
 export const errorResponses = {
-  400: errorResponseSchema,
-  401: errorResponseSchema,
-  403: errorResponseSchema,
-  404: errorResponseSchema,
-  500: errorResponseSchema,
+  400: errorResponseSchema("Validation error"),
+  401: errorResponseSchema("Unauthorized"),
+  403: errorResponseSchema("Forbidden"),
+  404: errorResponseSchema("Route not found"),
+  500: errorResponseSchema("Internal server error"),
 };
