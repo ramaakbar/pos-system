@@ -82,6 +82,7 @@ export const TransactionDetail = ({ transaction }: Props) => {
           Date
         </Heading>
         <div>{new Date(transaction.createdAt).toDateString()}</div>
+        <div>{new Date(transaction.date).toLocaleString()}</div>
       </div>
       <div className="mb-6">
         <Heading variant={"h4"} className="mb-2">

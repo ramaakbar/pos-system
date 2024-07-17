@@ -1,5 +1,4 @@
 import {
-  date,
   integer,
   pgTable,
   text,
@@ -46,7 +45,9 @@ export const headerTransactionsTable = pgTable("headerTransactions", {
   address: varchar("address", {
     length: 255,
   }),
-  date: date("date"),
+  date: timestamp("date", {
+    mode: "string",
+  }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("modified_at").defaultNow().notNull(),
 });

@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS "headerTransactions" (
 	"payment_method" text NOT NULL,
 	"amount" integer NOT NULL,
 	"address" varchar(255),
-	"date" date,
+	"date" timestamp NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"modified_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "headerTransactions_code_unique" UNIQUE("code")

@@ -55,7 +55,7 @@ export default function CheckoutDrawer({ items }: Props) {
     defaultValues: {
       customer: "",
       address: "",
-      date: new Date().toISOString().substring(0, 10),
+      date: new Date().toISOString().substring(0, 16),
     },
     criteriaMode: "all",
   });
@@ -165,7 +165,7 @@ export default function CheckoutDrawer({ items }: Props) {
                           <FormLabel>Date</FormLabel>
                         </div>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input type="datetime-local" {...field} />
                         </FormControl>
                         <FormMessage />
                       </div>

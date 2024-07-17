@@ -138,7 +138,9 @@ export const transactionsRoutes = new Elysia({
           paymentMethod: headerTransactionsTable.paymentMethod,
           paymentStatus: headerTransactionsTable.paymentStatus,
           transactionStatus: headerTransactionsTable.transactionStatus,
-          customer: customersTable,
+          customer: {
+            ...getTableColumns(customersTable),
+          },
           date: headerTransactionsTable.date,
           createdAt: headerTransactionsTable.createdAt,
           updatedAt: headerTransactionsTable.updatedAt,

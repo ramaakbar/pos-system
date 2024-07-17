@@ -11,8 +11,8 @@ function categoryFactory() {
 
   const categoryObj: typeof categoriesTable.$inferInsert = {
     name: faker.word.adjective(),
-    createdAt: date,
-    updatedAt: date,
+    createdAt: date.toString(),
+    updatedAt: date.toString(),
   };
   return categoryObj;
 }
