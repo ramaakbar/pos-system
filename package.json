@@ -43,7 +43,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.31.2",
     "drizzle-typebox": "^0.1.1",
-    "elysia": "^1.0.25",
+    "elysia": "^1.1.2",
     "elysia-helmet": "^2.0.0",
     "flydrive": "^1.0.2",
     "lucia": "^3.2.0",
