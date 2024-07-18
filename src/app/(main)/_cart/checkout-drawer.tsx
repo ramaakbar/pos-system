@@ -42,10 +42,7 @@ export default function CheckoutDrawer({ items }: Props) {
   const removeAllItem = useCartStore((state) => state.removeAllItem);
 
   const formTransactionSchema = t.Object({
-    customer: t.String({
-      minLength: 1,
-      error: "Customer is required",
-    }),
+    customer: t.String(),
     address: t.String(),
     date: t.String(),
   });
