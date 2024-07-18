@@ -1,8 +1,6 @@
 import { randomInt } from "crypto";
 import { faker } from "@faker-js/faker";
 
-import { getBaseUrl } from "@/lib/utils";
-
 import { db as DbType } from "..";
 import { categoriesTable } from "../schema/categories";
 import { productsTable } from "../schema/products";
@@ -18,7 +16,7 @@ function productFactory(ctg: Array<typeof categoriesTable.$inferSelect>) {
     categoryId: ctg[randomInt(ctg.length)].id,
     description: faker.commerce.productDescription(),
     price: parseInt(faker.commerce.price({ min: 1000, max: 20000, dec: 0 })),
-    media: getBaseUrl() + "/uploads/cookie-sample.jpg",
+    media: "/uploads/cookie-sample.jpg",
     quantity: faker.number.int({ min: 0, max: 30 }),
     createdAt: date,
     updatedAt: date,

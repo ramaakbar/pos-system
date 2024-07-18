@@ -193,7 +193,7 @@ export const productsRoutes = new Elysia({
           price,
           quantity,
           description,
-          media: saveImage,
+          media: "/uploads/" + saveImage,
         })
         .returning({
           id: productsTable.id,

@@ -6,10 +6,10 @@ import { productsTable } from "@/server/db/schema/products";
 const insertSchema = createInsertSchema(productsTable, {
   name: t.String({}),
   categoryId: t.String(),
-  price: t.Number({
+  price: t.Numeric({
     minimum: 1,
   }),
-  quantity: t.Number(),
+  quantity: t.Numeric(),
   media: t.File({
     maxSize: 2000000,
     type: ["image"],

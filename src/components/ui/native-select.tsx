@@ -4,12 +4,13 @@ import { cn } from "@/lib/utils";
 
 export type NativeSelectProps<T> = React.ComponentProps<"select"> & {
   data: readonly T[] | Array<T>;
+  loading?: boolean;
 };
 
 const NativeSelect = React.forwardRef<
   HTMLSelectElement,
   NativeSelectProps<any>
->(({ className, data, ...props }, ref) => {
+>(({ className, data, loading = false, ...props }, ref) => {
   return (
     <select
       className={cn(
@@ -19,9 +20,27 @@ const NativeSelect = React.forwardRef<
       ref={ref}
       {...props}
     >
-      {data.map((item, index) => (
-        <option key={index}>{item}</option>
-      ))}
+      {loading ? (
+        <option>Loading...</option>
+      ) : (
+        <>
+          {data.length === 0 ? (
+            <option>No options available</option>
+          ) : (
+            data.map((item, index) =>
+              typeof item === "object" ? (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ) : (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              )
+            )
+          )}
+        </>
+      )}
     </select>
   );
 });
