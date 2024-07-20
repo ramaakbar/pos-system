@@ -27,6 +27,8 @@
     ]
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.616.0",
+    "@aws-sdk/s3-request-presigner": "^3.616.0",
     "@elysiajs/cors": "^1.0.2",
     "@elysiajs/eden": "^1.0.14",
     "@elysiajs/swagger": "^1.0.5",

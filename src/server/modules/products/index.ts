@@ -93,6 +93,10 @@ export const productsRoutes = new Elysia({
             : asc(productsTable[sort ?? "createdAt"])
         );
 
+      for (const product of products) {
+        product.media = await disk.getUrl(product.media);
+      }
+
       return {
         success: true,
         pagination: {
@@ -144,6 +148,8 @@ export const productsRoutes = new Elysia({
         throw new Error("Product not found");
       }
 
+      product.media = await disk.getUrl(product.media);
+
       return {
         success: true,
         data: product,
@@ -193,7 +199,7 @@ export const productsRoutes = new Elysia({
           price,
           quantity,
           description,
-          media: "/uploads/" + saveImage,
+          media: saveImage,
         })
         .returning({
           id: productsTable.id,
@@ -223,7 +229,6 @@ export const productsRoutes = new Elysia({
   .patch(
     "/:id",
     async ({ params, body, set, user }) => {
-      console.log("product", user);
       const id = params.id;
       const { name, categoryId, price, quantity, description, media } = body;
 

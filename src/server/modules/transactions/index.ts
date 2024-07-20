@@ -20,6 +20,7 @@ import {
   idParamSchema,
   paginationQuerySchema,
 } from "@/server/lib/common-schemas";
+import { disk } from "@/server/lib/flydrive";
 import { jsonBuildObject } from "@/server/lib/utils";
 import { ctx } from "@/server/plugins/context";
 
@@ -177,6 +178,10 @@ export const transactionsRoutes = new Elysia({
           eq(productsTable.categoryId, categoriesTable.id)
         )
         .where(eq(detailTransactionsTable.transactionId, id));
+
+      for (const dt of transactionDetail) {
+        dt.product.media = await disk.getUrl(dt.product.media);
+      }
 
       const transaction = {
         ...transactionHeader,
