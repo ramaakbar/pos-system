@@ -63,6 +63,10 @@ export const categoriesRoute = new Elysia({
       },
     }
   )
+  .guard({
+    isAuth: true,
+    isAdmin: true,
+  })
   .post(
     "/",
     async ({ body, set }) => {

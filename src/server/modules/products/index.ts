@@ -164,6 +164,7 @@ export const productsRoutes = new Elysia({
   )
   .guard({
     isAuth: true,
+    isAdmin: true,
   })
   .post(
     "/",

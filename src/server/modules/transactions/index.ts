@@ -36,6 +36,10 @@ export const transactionsRoutes = new Elysia({
   },
 })
   .use(ctx)
+  .guard({
+    isAuth: true,
+    isAdmin: true,
+  })
   .get(
     "/",
     async ({ query, set }) => {
