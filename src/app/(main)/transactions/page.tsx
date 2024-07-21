@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,20 +14,21 @@ import { numberToRupiah } from "@/lib/utils";
 import { MainTransactions } from "@/routes";
 import { useSearchParams } from "@/routes/hooks";
 
+import { PaginatedList } from "../../../components/paginated-list";
 import { TransactionDetailDrawer } from "./transaction-detail-drawer";
-import { TransactionPagination } from "./transaction-pagination";
 
 export default function Page() {
   const searchQuery = useSearchParams(MainTransactions).search || "";
   const pageQuery = useSearchParams(MainTransactions).page || 1;
 
-  const { data, isLoading } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ["transactions", pageQuery, searchQuery],
     queryFn: async () => {
       const { data, error } = await client.api.transactions.index.get({
         query: {
           search: searchQuery,
           page: pageQuery,
+          limit: 1,
         },
       });
 
@@ -49,10 +51,16 @@ export default function Page() {
           <Input placeholder="Search transactions" />
         </div>
       </div>
+      {isFetching && (
+        <div className="my-4 flex justify-center">
+          <Loader2 className={"size-16 animate-spin"} />
+        </div>
+      )}
+      {!isFetching && (!data || data.data.length === 0) && (
+        <div className="my-4 flex justify-center">No Data</div>
+      )}
       <div className="mb-6 grid grid-cols-12 gap-6 overflow-auto">
-        {isLoading && "Loading..."}
-        {!isLoading && (!data || data.data.length === 0) && "No Data"}
-        {!isLoading &&
+        {!isFetching &&
           data &&
           data.data.map((transaction) => (
             <Link
@@ -82,10 +90,11 @@ export default function Page() {
       </div>
       {data && <TransactionDetailDrawer />}
       {data && (
-        <TransactionPagination
+        <PaginatedList
           totalPages={data.pagination.pageCount}
           currentPage={data.pagination.currentPage}
           className="mb-5"
+          route={MainTransactions}
         />
       )}
     </div>

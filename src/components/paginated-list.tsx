@@ -1,3 +1,7 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
+
 import {
   Pagination,
   PaginationContent,
@@ -8,24 +12,34 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
-import { MainTransactions } from "@/routes";
+
+type RouteFunction = (
+  params?: Record<string, string | number>,
+  query?: Record<string, string | number>
+) => string;
 
 type Props = {
   totalPages: number;
   totalPagesToDisplay?: number;
   currentPage: number;
   className?: string;
+  route: RouteFunction;
 };
 
-export const TransactionPagination = ({
+export const PaginatedList = ({
   totalPages,
   totalPagesToDisplay = 5,
   currentPage,
   className,
+  route,
 }: Props) => {
+  const searchParams = useSearchParams();
+  const existingQuery = Object.fromEntries(searchParams.entries());
+
   const showLeftEllipsis = currentPage - 1 > totalPagesToDisplay / 2;
   const showRightEllipsis =
     totalPages - currentPage + 1 > totalPagesToDisplay / 2;
+
   const getPageNumbers = () => {
     if (totalPages <= totalPagesToDisplay) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -56,9 +70,10 @@ export const TransactionPagination = ({
     return pageNumbers.map((pageNumber) => (
       <PaginationItem key={pageNumber}>
         <PaginationLink
-          href={MainTransactions(
+          href={route(
             {},
             {
+              ...existingQuery,
               page: pageNumber,
             }
           )}
@@ -77,9 +92,10 @@ export const TransactionPagination = ({
           <PaginationPrevious
             href={
               currentPage !== 1
-                ? MainTransactions(
+                ? route(
                     {},
                     {
+                      ...existingQuery,
                       page: currentPage - 1,
                     }
                   )
@@ -103,9 +119,10 @@ export const TransactionPagination = ({
           <PaginationNext
             href={
               currentPage !== totalPages
-                ? MainTransactions(
+                ? route(
                     {},
                     {
+                      ...existingQuery,
                       page: currentPage + 1,
                     }
                   )

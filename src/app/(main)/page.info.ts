@@ -5,5 +5,6 @@ export const Route = {
   params: z.object({}),
   search: z.object({
     search: z.string().optional(),
+    page: z.coerce.number().default(1),
   }),
 };
