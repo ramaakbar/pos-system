@@ -30,7 +30,7 @@ export const errorResponseSchema = (msg: string) =>
   });
 
 export const errorResponses = {
-  400: errorResponseSchema("Validation error"),
+  400: errorResponseSchema("Bad Request"),
   401: errorResponseSchema("Unauthorized"),
   403: errorResponseSchema("Forbidden"),
   404: errorResponseSchema("Route not found"),
