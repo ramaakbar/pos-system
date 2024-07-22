@@ -28,7 +28,6 @@ export default function Page() {
         query: {
           search: searchQuery,
           page: pageQuery,
-          limit: 1,
         },
       });
 

@@ -29,7 +29,6 @@ export default function Home() {
         query: {
           search: searchQuery,
           page: pageQuery,
-          limit: 4,
         },
       });
 
