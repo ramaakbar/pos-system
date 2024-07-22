@@ -100,7 +100,7 @@ export default function Home() {
             <PaginatedList
               totalPages={data.pagination.pageCount}
               currentPage={data.pagination.currentPage}
-              className="mb-5"
+              className="sticky bottom-0 mb-5 bg-background"
               route={Main}
             />
           )}

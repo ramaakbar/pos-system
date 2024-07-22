@@ -79,6 +79,12 @@ export const TransactionDetail = ({ transaction }: Props) => {
       </div>
       <div className="mb-6">
         <Heading variant={"h4"} className="mb-2">
+          Address
+        </Heading>
+        <div>{transaction.address}</div>
+      </div>
+      <div className="mb-6">
+        <Heading variant={"h4"} className="mb-2">
           Date
         </Heading>
         <div>{new Date(transaction.createdAt).toDateString()}</div>
