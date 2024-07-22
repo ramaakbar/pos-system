@@ -74,7 +74,7 @@ export default function BottomNav({ user }: Props) {
   });
 
   return (
-    <nav className="border-t bg-white px-4">
+    <nav className="sticky bottom-0 z-0 border-t bg-white px-4">
       <div className="mx-auto flex max-w-4xl justify-between">
         {routeLinks.map((route, index) => (
           <Link href={route.href} key={route.href}>
