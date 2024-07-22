@@ -17,6 +17,7 @@ import CartSection from "./_cart/cart-section";
 import { useCartStore } from "./_cart/useCartStore";
 import { CreateProductDrawer } from "./_products/create-product-drawer";
 import SearchProduct from "./_products/search-product";
+import { UpdateStockDrawer } from "./_products/update-stock-drawer";
 
 export default function Home() {
   const searchQuery = useSearchParams(Main).search || "";
@@ -56,7 +57,10 @@ export default function Home() {
           <Heading variant="h2" className="mb-3">
             Products
           </Heading>
-          <CreateProductDrawer />
+          <div>
+            <UpdateStockDrawer />
+            <CreateProductDrawer />
+          </div>
         </div>
         <SearchProduct searchQuery={searchQuery} />
         <div className="overflow-auto">
