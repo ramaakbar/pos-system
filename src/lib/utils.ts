@@ -17,13 +17,11 @@ export function getBaseUrl() {
 }
 
 export const numberToRupiah = (val: number): string => {
-  const formatter = new Intl.NumberFormat(
-    new Intl.NumberFormat().resolvedOptions().locale,
-    {
-      style: "currency",
-      currency: "IDR",
-    }
-  );
+  const formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  });
 
   return formatter.format(val);
 };
