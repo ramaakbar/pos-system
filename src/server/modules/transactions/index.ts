@@ -245,7 +245,7 @@ export const transactionsRoutes = new Elysia({
           .from(customersTable)
           .where(ilike(customersTable.name, body.customer));
 
-        if (!customer) {
+        if (!customer || body.customer !== "") {
           [customer] = await tx
             .insert(customersTable)
             .values({
