@@ -5,6 +5,14 @@ import { Loader2 } from "lucide-react";
 
 import { PaginatedList } from "@/components/paginated-list";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
@@ -75,8 +83,24 @@ export default function Home() {
             Products
           </Heading>
           <div>
-            <UpdateStockDrawer />
-            <CreateProductDrawer />
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button variant="default" size={"sm"}>
+                  Actions
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <div className="mx-auto flex w-full max-w-md flex-col overflow-auto rounded-t-[10px] p-4">
+                  <DrawerHeader>
+                    <DrawerTitle>Actions</DrawerTitle>
+                  </DrawerHeader>
+                  <div className="flex gap-4 p-4 pb-0">
+                    <UpdateStockDrawer />
+                    <CreateProductDrawer />
+                  </div>
+                </div>
+              </DrawerContent>
+            </Drawer>
           </div>
         </div>
         <SearchProduct className="mb-4" searchQuery={searchQuery} />

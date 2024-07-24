@@ -70,7 +70,7 @@ export const UpdateStockDrawer = ({}: Props) => {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant="default" size={"sm"}>
+        <Button variant="default" size={"sm"} className="w-full">
           Update Product Stock
         </Button>
       </DrawerTrigger>

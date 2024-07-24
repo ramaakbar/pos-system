@@ -90,7 +90,7 @@ export const CreateProductDrawer = ({}: Props) => {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant="default" className="">
+        <Button variant="default" size={"sm"} className="w-full">
           Create Product
         </Button>
       </DrawerTrigger>
