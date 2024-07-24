@@ -13,3 +13,7 @@ const connection = postgres(serverEnvs.DB_URL, {
 export const db = drizzle(connection, {
   schema: { usersTable, sessionsTable },
 });
+
+export type DB =
+  | typeof db
+  | Parameters<Parameters<typeof db.transaction>[0]>[0];
