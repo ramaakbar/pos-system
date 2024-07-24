@@ -1,5 +1,14 @@
 import { randomUUID } from "crypto";
-import { asc, count, desc, eq, ilike, SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  ilike,
+  SQL,
+} from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import { db } from "@/server/db";
@@ -13,14 +22,15 @@ import {
   successResponseWithDataSchema,
   successResponseWithPaginationSchema,
 } from "@/server/lib/common-responses";
-import {
-  idParamSchema,
-  paginationQuerySchema,
-} from "@/server/lib/common-schemas";
+import { idParamSchema } from "@/server/lib/common-schemas";
 import { disk } from "@/server/lib/flydrive";
 import { ctx } from "@/server/plugins/context";
 
-import { createProductDtoSchema, updateProductDtoSchema } from "./schema";
+import {
+  createProductDtoSchema,
+  getProductQuerySchema,
+  updateProductDtoSchema,
+} from "./schema";
 
 export const productsRoutes = new Elysia({
   prefix: "/products",
@@ -32,17 +42,23 @@ export const productsRoutes = new Elysia({
   .get(
     "/",
     async ({ query, set }) => {
-      const { search, sort, order, page = 1, limit = 20 } = query;
+      const { search, sort, order, page = 1, limit = 20, category } = query;
 
-      const filter: SQL | undefined = search
-        ? ilike(productsTable.name, `%${search}%`)
-        : undefined;
+      const filter: Array<SQL> = [];
 
-      const productsQuery = db.select().from(productsTable).where(filter);
+      if (search) filter.push(ilike(productsTable.name, `%${search}%`));
+      if (category) filter.push(ilike(categoriesTable.name, `%${category}%`));
+
+      const where = filter.length > 0 ? and(...filter) : undefined;
 
       const [{ total }] = await db
         .select({ total: count() })
-        .from(productsQuery.as("products"));
+        .from(productsTable)
+        .innerJoin(
+          categoriesTable,
+          eq(productsTable.categoryId, categoriesTable.id)
+        )
+        .where(where);
 
       const pageCount = Math.ceil(total / Number(limit));
 
@@ -76,15 +92,16 @@ export const productsRoutes = new Elysia({
           media: productsTable.media,
           price: productsTable.price,
           quantity: productsTable.quantity,
-          category: categoriesTable,
+          category: getTableColumns(categoriesTable),
           createdAt: productsTable.createdAt,
           updatedAt: productsTable.updatedAt,
         })
-        .from(productsQuery.as("products"))
+        .from(productsTable)
         .innerJoin(
           categoriesTable,
           eq(productsTable.categoryId, categoriesTable.id)
         )
+        .where(where)
         .limit(limit)
         .offset(limit * (page - 1))
         .orderBy(
@@ -111,7 +128,7 @@ export const productsRoutes = new Elysia({
       };
     },
     {
-      query: paginationQuerySchema,
+      query: getProductQuerySchema,
       response: {
         200: successResponseWithPaginationSchema(productSchema),
       },

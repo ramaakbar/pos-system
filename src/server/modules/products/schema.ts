@@ -2,6 +2,7 @@ import { createInsertSchema } from "drizzle-typebox";
 import { t } from "elysia";
 
 import { productsTable } from "@/server/db/schema/products";
+import { paginationQuerySchema } from "@/server/lib/common-schemas";
 
 const insertSchema = createInsertSchema(productsTable, {
   name: t.String({}),
@@ -22,3 +23,8 @@ export const createProductDtoSchema = t.Omit(insertSchema, [
 ]);
 
 export const updateProductDtoSchema = t.Partial(createProductDtoSchema);
+
+export const getProductQuerySchema = t.Object({
+  ...paginationQuerySchema.properties,
+  category: t.Optional(t.String()),
+});

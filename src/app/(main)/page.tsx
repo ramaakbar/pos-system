@@ -4,12 +4,13 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
 import { PaginatedList } from "@/components/paginated-list";
+import { Badge } from "@/components/ui/badge";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
 import { numberToRupiah } from "@/lib/utils";
 import { Main } from "@/routes";
-import { useSearchParams } from "@/routes/hooks";
+import { usePush, useSearchParams } from "@/routes/hooks";
 import { Product } from "@/server/db/schema/products";
 
 import CartDrawer from "./_cart/cart-drawer";
@@ -22,14 +23,18 @@ import { UpdateStockDrawer } from "./_products/update-stock-drawer";
 export default function Home() {
   const searchQuery = useSearchParams(Main).search || "";
   const pageQuery = useSearchParams(Main).page || 1;
+  const categoryQuery = useSearchParams(Main).category || "";
 
-  const { data, isFetching } = useQuery({
-    queryKey: ["products", pageQuery, searchQuery],
+  const pushMain = usePush(Main);
+
+  const { data: products, isFetching: isFetchingProducts } = useQuery({
+    queryKey: ["products", pageQuery, searchQuery, categoryQuery],
     queryFn: async () => {
       const { data, error } = await client.api.products.index.get({
         query: {
           search: searchQuery,
           page: pageQuery,
+          category: categoryQuery,
         },
       });
 
@@ -39,6 +44,18 @@ export default function Home() {
       return data;
     },
     placeholderData: keepPreviousData,
+  });
+
+  const { data: categories, isFetching: isFetchingCategories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data, error } = await client.api.categories.index.get();
+
+      if (error) {
+        throw error.value;
+      }
+      return data;
+    },
   });
 
   const addItem = useCartStore((state) => state.addItem);
@@ -62,20 +79,60 @@ export default function Home() {
             <CreateProductDrawer />
           </div>
         </div>
-        <SearchProduct searchQuery={searchQuery} />
-        <div className="overflow-auto">
-          {isFetching && (
-            <div className="my-4 flex justify-center">
+        <SearchProduct className="mb-4" searchQuery={searchQuery} />
+        <div className="mb-4 overflow-auto">
+          <div className="flex w-max gap-4">
+            <Badge
+              variant={categoryQuery === "" ? "secondary" : "outline"}
+              onClick={() =>
+                pushMain(
+                  {},
+                  {
+                    search: searchQuery,
+                    page: pageQuery,
+                  }
+                )
+              }
+            >
+              All
+            </Badge>
+            {categories?.data.map((category) => (
+              <Badge
+                variant={
+                  categoryQuery === category.name ? "secondary" : "outline"
+                }
+                key={category.id}
+                onClick={() =>
+                  pushMain(
+                    {},
+                    {
+                      search: searchQuery,
+                      page: pageQuery,
+                      category: category.name,
+                    }
+                  )
+                }
+              >
+                {category.name}
+              </Badge>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-1 flex-col overflow-auto">
+          {isFetchingProducts && (
+            <div className="my-4 flex flex-1 items-center justify-center">
               <Loader2 className={"size-16 animate-spin"} />
             </div>
           )}
-          {!isFetching && (!data || data.data.length === 0) && (
-            <div className="my-4 flex justify-center">No Data</div>
+          {!isFetchingProducts && (!products || products.data.length === 0) && (
+            <div className="my-4 flex flex-1 items-center justify-center">
+              No Data
+            </div>
           )}
           <div className="mb-6 grid grid-cols-12 gap-6">
-            {!isFetching &&
-              data &&
-              data.data.map((product) => (
+            {!isFetchingProducts &&
+              products &&
+              products.data.map((product) => (
                 <div
                   key={product.id}
                   className="col-span-6 rounded-md border shadow-sm md:col-span-4"
@@ -96,10 +153,10 @@ export default function Home() {
                 </div>
               ))}
           </div>
-          {data && (
+          {products && (
             <PaginatedList
-              totalPages={data.pagination.pageCount}
-              currentPage={data.pagination.currentPage}
+              totalPages={products.pagination.pageCount}
+              currentPage={products.pagination.currentPage}
               className="sticky bottom-0 mb-5 bg-background"
               route={Main}
             />
