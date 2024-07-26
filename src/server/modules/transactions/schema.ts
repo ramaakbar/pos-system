@@ -24,10 +24,8 @@ export const createTransactionDtoSchema = t.Object({
     "amount",
     "customerId",
   ]).properties,
-  customer: t.String({
-    minLength: 0,
-    error: "Customer is required",
-  }),
+  customer: t.Optional(t.String()),
+  address: t.Optional(t.String()),
   detail: t.Array(
     t.Omit(insertTransactionDetailSchema, [
       "createdAt",
@@ -36,6 +34,11 @@ export const createTransactionDtoSchema = t.Object({
     ])
   ),
 });
+
+export const createTransactionHeaderDtoSchema = t.Omit(
+  createTransactionDtoSchema,
+  ["detail"]
+);
 
 export const updateTransactionStatusDtoSchema = t.Object({
   transactionStatus: LiteralUnion(transactionStatusEnum),

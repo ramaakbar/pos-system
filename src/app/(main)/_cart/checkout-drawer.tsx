@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { DefaultError, useMutation } from "@tanstack/react-query";
-import { t, UnwrapSchema } from "elysia";
+import { UnwrapSchema } from "elysia";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -25,10 +25,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
-import { createTransactionDtoSchema } from "@/server/modules/transactions/schema";
+import { paymentMethodEnum } from "@/server/db/schema/transactions";
+import {
+  createTransactionDtoSchema,
+  createTransactionHeaderDtoSchema,
+} from "@/server/modules/transactions/schema";
 
 import { Item, useCartStore } from "./useCartStore";
 
@@ -41,17 +46,14 @@ export const CheckoutDrawer = ({ items }: Props) => {
 
   const removeAllItem = useCartStore((state) => state.removeAllItem);
 
-  const formTransactionSchema = t.Object({
-    customer: t.String(),
-    address: t.String(),
-    date: t.String(),
-  });
-
-  const form = useForm<UnwrapSchema<typeof formTransactionSchema>>({
-    resolver: typeboxResolver(formTransactionSchema),
+  const form = useForm<UnwrapSchema<typeof createTransactionHeaderDtoSchema>>({
+    resolver: typeboxResolver(createTransactionHeaderDtoSchema),
     defaultValues: {
       customer: "",
       address: "",
+      paymentMethod: "Transfer",
+      transactionStatus: "In Progress",
+      paymentStatus: "Not Paid",
       date: new Date().toISOString().substring(0, 16),
     },
     criteriaMode: "all",
@@ -82,7 +84,7 @@ export const CheckoutDrawer = ({ items }: Props) => {
   });
 
   const handleCheckout = (
-    formData: UnwrapSchema<typeof formTransactionSchema>
+    formData: UnwrapSchema<typeof createTransactionHeaderDtoSchema>
   ) => {
     if (!items || items.length < 1) {
       toast.error("cart is empty");
@@ -92,9 +94,9 @@ export const CheckoutDrawer = ({ items }: Props) => {
     mutate({
       customer: formData.customer,
       address: formData.address,
-      transactionStatus: "In Progress",
-      paymentStatus: "Not Paid",
-      paymentMethod: "transfer",
+      transactionStatus: formData.transactionStatus,
+      paymentStatus: formData.paymentStatus,
+      paymentMethod: formData.paymentMethod,
       date: formData.date,
       detail: items.map((val) => ({
         productId: val.product.id,
@@ -146,6 +148,23 @@ export const CheckoutDrawer = ({ items }: Props) => {
                         </div>
                         <FormControl>
                           <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="paymentMethod"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="space-y-2 leading-none">
+                        <div className="space-y-1">
+                          <FormLabel>Payment Method</FormLabel>
+                        </div>
+                        <FormControl>
+                          <NativeSelect data={paymentMethodEnum} {...field} />
                         </FormControl>
                         <FormMessage />
                       </div>

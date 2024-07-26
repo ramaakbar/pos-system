@@ -92,6 +92,12 @@ export const TransactionDetail = ({ transaction }: Props) => {
       </div>
       <div className="mb-6">
         <Heading variant={"h4"} className="mb-2">
+          Payment Method
+        </Heading>
+        <div>{transaction.paymentMethod}</div>
+      </div>
+      <div className="mb-6">
+        <Heading variant={"h4"} className="mb-2">
           Status
         </Heading>
         <div className="mb-1">

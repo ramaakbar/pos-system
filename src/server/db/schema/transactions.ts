@@ -19,7 +19,10 @@ export const transactionStatusEnum = [
   "In Progress",
   "Done",
 ] as const;
+
 export const paymentStatusEnum = ["Not Paid", "Paid"] as const;
+
+export const paymentMethodEnum = ["Cash", "Transfer", "Qris"] as const;
 
 export const headerTransactionsTable = pgTable("headerTransactions", {
   id: varchar("id", { length: 255 })
@@ -39,7 +42,7 @@ export const headerTransactionsTable = pgTable("headerTransactions", {
     enum: paymentStatusEnum,
   }).notNull(),
   paymentMethod: text("payment_method", {
-    enum: ["cash", "transfer", "qris"],
+    enum: paymentMethodEnum,
   }).notNull(),
   amount: integer("amount").notNull(),
   address: varchar("address", {

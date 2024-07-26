@@ -151,7 +151,7 @@ export const transactionsRoutes = new Elysia({
           updatedAt: headerTransactionsTable.updatedAt,
         })
         .from(headerTransactionsTable)
-        .innerJoin(
+        .leftJoin(
           customersTable,
           eq(headerTransactionsTable.customerId, customersTable.id)
         )
@@ -240,12 +240,15 @@ export const transactionsRoutes = new Elysia({
 
         await Promise.all(stockCheckPromises);
 
-        let [customer] = await tx
-          .select()
-          .from(customersTable)
-          .where(ilike(customersTable.name, body.customer));
+        let customer;
+        if (body.customer) {
+          [customer] = await tx
+            .select()
+            .from(customersTable)
+            .where(ilike(customersTable.name, body.customer));
+        }
 
-        if (!customer || body.customer !== "") {
+        if (!customer && body.customer) {
           [customer] = await tx
             .insert(customersTable)
             .values({
@@ -257,7 +260,7 @@ export const transactionsRoutes = new Elysia({
         const [{ id }] = await tx
           .insert(headerTransactionsTable)
           .values({
-            customerId: customer.id,
+            customerId: customer ? customer.id : null,
             transactionStatus: body.transactionStatus,
             paymentStatus: body.paymentStatus,
             paymentMethod: body.paymentMethod,
