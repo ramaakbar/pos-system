@@ -21,7 +21,7 @@ import { client } from "@/lib/client";
 import { Main } from "@/routes";
 import { loginDtoSchema } from "@/server/modules/auth/schema";
 
-export function RegisterForm() {
+export const RegisterForm = () => {
   const { push } = useRouter();
 
   const form = useForm<UnwrapSchema<typeof loginDtoSchema>>({
@@ -109,4 +109,4 @@ export function RegisterForm() {
       </form>
     </Form>
   );
-}
+};

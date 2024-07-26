@@ -27,9 +27,7 @@ import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
 import { updateProductDtoSchema } from "@/server/modules/products/schema";
 
-type Props = {};
-
-export const UpdateStockDrawer = ({}: Props) => {
+export const UpdateStockDrawer = () => {
   const [open, setOpen] = useState(false);
 
   const form = useForm<UnwrapSchema<typeof updateProductDtoSchema>>({

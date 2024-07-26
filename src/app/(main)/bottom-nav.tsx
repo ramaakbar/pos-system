@@ -24,23 +24,10 @@ type Props = {
   user: User;
 };
 
-export default function BottomNav({ user }: Props) {
+export const BottomNav = ({ user }: Props) => {
   const pathName = usePathname();
   const pushToLogin = usePush(AuthLogin);
 
-  // interface Route {
-  //   name: string;
-  //   path: string;
-  // }
-
-  // const getRouteLinks = (routes: { [key: string]: () => string }): Route[] => {
-  //   return Object.keys(routes).map((routeKey) => ({
-  //     name: routeKey,
-  //     path: routes[routeKey](),
-  //   }));
-  // };
-
-  // const routeLinks = getRouteLinks(Routes);
   const routeLinks = [
     {
       name: "Home",
@@ -122,4 +109,4 @@ export default function BottomNav({ user }: Props) {
       </div>
     </nav>
   );
-}
+};

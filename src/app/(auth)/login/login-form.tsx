@@ -21,7 +21,7 @@ import { Main } from "@/routes";
 import { usePush } from "@/routes/hooks";
 import { loginDtoSchema } from "@/server/modules/auth/schema";
 
-export function LoginForm() {
+export const LoginForm = () => {
   const pushToMain = usePush(Main);
 
   const form = useForm<UnwrapSchema<typeof loginDtoSchema>>({
@@ -109,4 +109,4 @@ export function LoginForm() {
       </form>
     </Form>
   );
-}
+};

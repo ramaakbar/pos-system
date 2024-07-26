@@ -12,13 +12,11 @@ import { Text } from "@/components/ui/text";
 import useStore from "@/hooks/useStore";
 import { numberToRupiah } from "@/lib/utils";
 
-import CartItem from "./cart-items";
-import CheckoutDrawer from "./checkout-drawer";
+import { CartItem } from "./cart-item";
+import { CheckoutDrawer } from "./checkout-drawer";
 import { useCartStore } from "./useCartStore";
 
-type Props = {};
-
-export default function CartDrawer({}: Props) {
+export const CartDrawer = () => {
   const items = useStore(useCartStore, (state) => state.items);
   const getTotalPrice = useCartStore((state) => state.getTotalPrice);
 
@@ -58,4 +56,4 @@ export default function CartDrawer({}: Props) {
       </DrawerContent>
     </Drawer>
   );
-}
+};

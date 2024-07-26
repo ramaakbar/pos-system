@@ -8,13 +8,13 @@ import { cn } from "@/lib/utils";
 import { Main } from "@/routes";
 import { usePush } from "@/routes/hooks";
 
-export default function SearchProduct({
+export const SearchProduct = ({
   searchQuery,
   className,
 }: {
   searchQuery: string;
   className: string;
-}) {
+}) => {
   const [query, setQuery] = useState(searchQuery);
   const debounceValue = useDebounce(query, 500);
   const router = usePush(Main);
@@ -31,4 +31,4 @@ export default function SearchProduct({
       onChange={(e) => setQuery(e.target.value)}
     />
   );
-}
+};

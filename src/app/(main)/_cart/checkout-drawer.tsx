@@ -36,7 +36,7 @@ type Props = {
   items: Item[] | undefined;
 };
 
-export default function CheckoutDrawer({ items }: Props) {
+export const CheckoutDrawer = ({ items }: Props) => {
   const [open, setOpen] = useState(false);
 
   const removeAllItem = useCartStore((state) => state.removeAllItem);
@@ -186,4 +186,4 @@ export default function CheckoutDrawer({ items }: Props) {
       </DrawerContent>
     </Drawer>
   );
-}
+};

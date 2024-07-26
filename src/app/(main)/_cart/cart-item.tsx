@@ -8,7 +8,7 @@ type Props = {
   item: Item;
 };
 
-export default function CartItem({ item }: Props) {
+export const CartItem = ({ item }: Props) => {
   const incrementQuantity = useCartStore((state) => state.incrementQuantity);
   const decrementQuantity = useCartStore((state) => state.decrementQuantity);
 
@@ -37,4 +37,4 @@ export default function CartItem({ item }: Props) {
       </Button>
     </div>
   );
-}
+};

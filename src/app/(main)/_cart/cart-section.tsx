@@ -3,8 +3,8 @@
 import useStore from "@/hooks/useStore";
 import { numberToRupiah } from "@/lib/utils";
 
-import CartItem from "./cart-items";
-import CheckoutDrawer from "./checkout-drawer";
+import { CartItem } from "./cart-item";
+import { CheckoutDrawer } from "./checkout-drawer";
 import { useCartStore } from "./useCartStore";
 
 type Props = {};

@@ -12,12 +12,12 @@ import { Heading } from "@/components/ui/heading";
 import { Main } from "@/routes";
 import { useSearchParams } from "@/routes/hooks";
 
-import CartDrawer from "./_cart/cart-drawer";
+import { CartDrawer } from "./_cart/cart-drawer";
 import CartSection from "./_cart/cart-section";
 import { CategoryFilterList } from "./_products/category-filter-list";
 import { CreateProductDrawer } from "./_products/create-product-drawer";
 import { ProductList } from "./_products/product-list";
-import SearchProduct from "./_products/search-product";
+import { SearchProduct } from "./_products/search-product";
 import { UpdateStockDrawer } from "./_products/update-stock-drawer";
 
 export default function Home() {
