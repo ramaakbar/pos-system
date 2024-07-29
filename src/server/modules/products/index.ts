@@ -9,7 +9,7 @@ import {
   ilike,
   SQL,
 } from "drizzle-orm";
-import Elysia, { t } from "elysia";
+import Elysia from "elysia";
 
 import { db } from "@/server/db";
 import { categoriesTable } from "@/server/db/schema/categories";
@@ -310,27 +310,16 @@ export const productsRoutes = new Elysia({
     }
   ) //TEMP routing for update stock
   .patch(
-    "/stock/:name",
+    "/stock/:id",
     async ({ params, body, set, user }) => {
-      const name = decodeURI(params.name);
       const { quantity } = body;
-
-      const [productFound] = await db
-        .select()
-        .from(productsTable)
-        .where(eq(productsTable.name, name));
-
-      if (!productFound) {
-        set.status = "Bad Request";
-        throw new Error("Product not found");
-      }
 
       const [product] = await db
         .update(productsTable)
         .set({
           quantity,
         })
-        .where(eq(productsTable.name, name))
+        .where(eq(productsTable.id, params.id))
         .returning({
           id: productsTable.id,
           code: productsTable.code,
@@ -350,9 +339,7 @@ export const productsRoutes = new Elysia({
       };
     },
     {
-      params: t.Object({
-        name: t.String(),
-      }),
+      params: idParamSchema,
       body: updateProductDtoSchema,
       response: {
         200: successResponseWithDataSchema(returningProductSchema),

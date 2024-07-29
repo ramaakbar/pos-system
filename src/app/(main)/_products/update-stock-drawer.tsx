@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
-import { DefaultError, useMutation } from "@tanstack/react-query";
+import { DefaultError, useMutation, useQuery } from "@tanstack/react-query";
 import { UnwrapSchema } from "elysia";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { AutoComplete } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -47,7 +48,7 @@ export const UpdateStockDrawer = () => {
     mutationKey: ["products"],
     mutationFn: async (values) => {
       const { data, error } = await client.api.products
-        .stock({ name: values.name as string })
+        .stock({ id: values.name as string })
         .patch(values);
 
       if (error) {
@@ -62,6 +63,30 @@ export const UpdateStockDrawer = () => {
       form.reset();
       toast.success("Product's stock updated");
       setOpen(false);
+    },
+  });
+
+  const [searchValue, setSearchValue] = useState<string>("");
+
+  const { data, isFetching } = useQuery({
+    queryKey: ["products", searchValue],
+    queryFn: async () => {
+      const { data, error } = await client.api.products.index.get({
+        query: {
+          search: searchValue,
+        },
+      });
+
+      if (error) {
+        throw error.value;
+      }
+      return data;
+    },
+    select: (data) => {
+      return data.data.map(({ name, id }) => ({
+        value: id,
+        label: name,
+      }));
     },
   });
 
@@ -90,7 +115,16 @@ export const UpdateStockDrawer = () => {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        {/* <Input {...field} /> */}
+                        <AutoComplete
+                          selectedValue={field.value}
+                          onSelectedValueChange={field.onChange}
+                          searchValue={searchValue}
+                          onSearchValueChange={setSearchValue}
+                          items={data ?? []}
+                          isLoading={isFetching}
+                          emptyMessage="Item Not found"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
