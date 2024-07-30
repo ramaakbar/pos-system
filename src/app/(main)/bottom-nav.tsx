@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
 import { Home, Inbox, Loader2, Settings, UserRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,11 +13,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Text } from "@/components/ui/text";
-import { client } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { AuthLogin, Main, MainTransactions } from "@/routes";
 import { usePush } from "@/routes/hooks";
 import { User } from "@/server/db/schema/users";
+
+import { useLogoutMutation } from "../(auth)/authHooks";
 
 type Props = {
   user: User;
@@ -46,19 +46,7 @@ export const BottomNav = ({ user }: Props) => {
     },
   ];
 
-  const { mutate: logout, isPending } = useMutation({
-    mutationKey: ["user"],
-    mutationFn: async () => {
-      const { data, error } = await client.api.auth.logout.post();
-      if (error) {
-        throw error.value;
-      }
-      return data;
-    },
-    onSuccess: async () => {
-      pushToLogin({});
-    },
-  });
+  const { mutate: logout, isPending } = useLogoutMutation();
 
   return (
     <nav className="sticky bottom-0 z-0 border-t bg-white px-4">

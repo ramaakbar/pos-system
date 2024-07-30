@@ -1,19 +1,13 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
-import { getUser } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
-import { AuthRegister, Main } from "@/routes";
+import { AuthRegister } from "@/routes";
 
 import { LoginForm } from "./login-form";
 
-export default async function LoginPage() {
-  const user = await getUser();
-
-  if (user) throw redirect(Main());
-
+export default function LoginPage() {
   return (
     <div className="flex h-full items-center justify-center">
       <div className="absolute right-0 top-0 p-4">

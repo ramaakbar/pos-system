@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
-import { DefaultError, useMutation } from "@tanstack/react-query";
 import { UnwrapSchema } from "elysia";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -17,9 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { client } from "@/lib/client";
-import { Main } from "@/routes";
 import { loginDtoSchema } from "@/server/modules/auth/schema";
+
+import { useRegisterMutation } from "../authHooks";
 
 export const RegisterForm = () => {
   const { push } = useRouter();
@@ -33,23 +32,7 @@ export const RegisterForm = () => {
     criteriaMode: "all",
   });
 
-  const { mutate, isPending } = useMutation<
-    unknown,
-    DefaultError,
-    UnwrapSchema<typeof loginDtoSchema>
-  >({
-    mutationKey: ["user"],
-    mutationFn: async (values) => {
-      const { data, error } = await client.api.auth.register.post(values);
-      if (error) {
-        throw error.value;
-      }
-      return data;
-    },
-    onSuccess: async () => {
-      push(Main());
-    },
-  });
+  const { mutate, isPending } = useRegisterMutation();
 
   return (
     <Form {...form}>

@@ -138,8 +138,8 @@ export const authRoutes = new Elysia({
     }
   )
   .guard({
-    isAuth: true,
+    isAuth: false,
   })
   .get("/me", ({ user }) => {
-    return { data: user };
+    return { user };
   });

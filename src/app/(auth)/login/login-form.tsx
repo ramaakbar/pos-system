@@ -1,7 +1,6 @@
 "use client";
 
 import { typeboxResolver } from "@hookform/resolvers/typebox";
-import { DefaultError, useMutation } from "@tanstack/react-query";
 import { UnwrapSchema } from "elysia";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -16,14 +15,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { client } from "@/lib/client";
-import { Main } from "@/routes";
-import { usePush } from "@/routes/hooks";
 import { loginDtoSchema } from "@/server/modules/auth/schema";
 
-export const LoginForm = () => {
-  const pushToMain = usePush(Main);
+import { useLoginMutation } from "../authHooks";
 
+export const LoginForm = () => {
   const form = useForm<UnwrapSchema<typeof loginDtoSchema>>({
     resolver: typeboxResolver(loginDtoSchema),
     defaultValues: {
@@ -33,23 +29,7 @@ export const LoginForm = () => {
     criteriaMode: "all",
   });
 
-  const { mutate, isPending } = useMutation<
-    unknown,
-    DefaultError,
-    UnwrapSchema<typeof loginDtoSchema>
-  >({
-    mutationKey: ["user"],
-    mutationFn: async (values) => {
-      const { data, error } = await client.api.auth.login.post(values);
-      if (error) {
-        throw error.value;
-      }
-      return data;
-    },
-    onSuccess: async () => {
-      pushToMain({});
-    },
-  });
+  const { mutate, isPending } = useLoginMutation();
 
   return (
     <Form {...form}>

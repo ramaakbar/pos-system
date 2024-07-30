@@ -1,27 +1,37 @@
-import { redirect } from "next/navigation";
+"use client";
 
+import { LoadingScreen } from "@/components/loading-screen";
 import { AuthLogin } from "@/routes";
+import { usePush } from "@/routes/hooks";
 
-import { getUser } from "../actions";
+import { useGetCurrentUserQuery } from "../(auth)/authHooks";
 import { BottomNav } from "./bottom-nav";
 
-export default async function MainLayout({
+export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getUser();
+  const pushToLogin = usePush(AuthLogin);
 
-  if (!user) {
-    throw redirect(AuthLogin());
+  const { data: user, isFetching, isError } = useGetCurrentUserQuery();
+
+  if (isFetching) {
+    return <LoadingScreen />;
   }
 
-  return (
-    <main className="relative z-0 flex h-full flex-col justify-between">
-      <section className="mx-auto size-full max-w-7xl flex-1 px-4">
-        {children}
-      </section>
-      <BottomNav user={user} />
-    </main>
-  );
+  if ((!isFetching && !user) || isError) {
+    pushToLogin({});
+  }
+
+  if (!isFetching && user) {
+    return (
+      <main className="relative z-0 flex h-full flex-col justify-between">
+        <section className="mx-auto size-full max-w-7xl flex-1 px-4">
+          {children}
+        </section>
+        <BottomNav user={user} />
+      </main>
+    );
+  }
 }
