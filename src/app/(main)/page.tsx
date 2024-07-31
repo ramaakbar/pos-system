@@ -13,7 +13,7 @@ import { Main } from "@/routes";
 import { useSearchParams } from "@/routes/hooks";
 
 import { CartDrawer } from "./_cart/cart-drawer";
-import CartSection from "./_cart/cart-section";
+import { CartSection } from "./_cart/cart-section";
 import { CategoryFilterList } from "./_products/category-filter-list";
 import { CreateProductDrawer } from "./_products/create-product-drawer";
 import { ProductList } from "./_products/product-list";

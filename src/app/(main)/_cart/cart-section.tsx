@@ -7,9 +7,7 @@ import { CartItem } from "./cart-item";
 import { CheckoutDrawer } from "./checkout-drawer";
 import { useCartStore } from "./useCartStore";
 
-type Props = {};
-
-export default function CartSection({}: Props) {
+export const CartSection = () => {
   const items = useStore(useCartStore, (state) => state.items);
   const getTotalPrice = useCartStore((state) => state.getTotalPrice);
 
@@ -31,4 +29,4 @@ export default function CartSection({}: Props) {
       </div>
     </>
   );
-}
+};
