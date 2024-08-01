@@ -56,7 +56,7 @@ export default function Home() {
         <SearchProduct className="mb-4" searchQuery={searchQuery} />
         <CategoryFilterList
           query={{
-            page: pageQuery,
+            page: 1,
             search: searchQuery,
             category: categoryQuery,
           }}
