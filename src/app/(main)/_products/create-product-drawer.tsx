@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { DefaultError, useMutation, useQuery } from "@tanstack/react-query";
 import { UnwrapSchema } from "elysia";
@@ -86,6 +86,12 @@ export const CreateProductDrawer = ({}: Props) => {
     },
     enabled: false,
   });
+
+  useEffect(() => {
+    form.reset({
+      categoryId: categories?.data[0].id,
+    });
+  }, [form, categories?.data]);
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
