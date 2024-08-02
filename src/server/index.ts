@@ -77,7 +77,8 @@ const app = new Elysia({
         .use(categoriesRoute)
         .use(productsRoutes)
         .use(transactionsRoutes)
-  );
+  )
+  .compile();
 
 export { app };
 export type App = typeof app;
