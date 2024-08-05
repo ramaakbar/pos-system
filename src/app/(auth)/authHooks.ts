@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import {
   DefaultError,
   useMutation,
@@ -7,8 +8,6 @@ import {
 import { UnwrapSchema } from "elysia";
 
 import { client } from "@/lib/client";
-import { AuthLogin, Main } from "@/routes";
-import { usePush } from "@/routes/hooks";
 import { loginDtoSchema } from "@/server/modules/auth/schema";
 
 export const useGetCurrentUserQuery = () => {
@@ -27,7 +26,7 @@ export const useGetCurrentUserQuery = () => {
 
 export const useLoginMutation = () => {
   const queryClient = useQueryClient();
-  const pushToMain = usePush(Main);
+  const router = useRouter();
 
   return useMutation<
     unknown,
@@ -44,14 +43,14 @@ export const useLoginMutation = () => {
     },
     onSuccess: async () => {
       queryClient.resetQueries({ queryKey: ["current-user"] });
-      pushToMain({});
+      router.push("/");
     },
   });
 };
 
 export const useRegisterMutation = () => {
   const queryClient = useQueryClient();
-  const pushToMain = usePush(Main);
+  const router = useRouter();
 
   return useMutation<
     unknown,
@@ -68,14 +67,14 @@ export const useRegisterMutation = () => {
     },
     onSuccess: async () => {
       queryClient.resetQueries({ queryKey: ["current-user"] });
-      pushToMain({});
+      router.push("/");
     },
   });
 };
 
 export const useLogoutMutation = () => {
   const queryClient = useQueryClient();
-  const pushToLogin = usePush(AuthLogin);
+  const router = useRouter();
 
   return useMutation({
     mutationKey: ["logout"],
@@ -88,7 +87,7 @@ export const useLogoutMutation = () => {
     },
     onSuccess: async () => {
       queryClient.resetQueries({ queryKey: ["current-user"] });
-      pushToLogin({});
+      router.push("/");
     },
   });
 };

@@ -1,22 +1,18 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { z } from "zod";
 
 import { PaginatedList } from "@/components/paginated-list";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
 import { numberToRupiah } from "@/lib/utils";
-import { Main } from "@/routes";
 import { Product } from "@/server/db/schema/products";
 
 import { useCartStore } from "../_cart/useCartStore";
-import { Route } from "../page.info";
+import { useProductPageQueryStates } from "../page-query";
 
-type ProductListProps = {
-  query: z.infer<typeof Route.search>;
-};
+export const ProductList = () => {
+  const [query, setQuery] = useProductPageQueryStates();
 
-export const ProductList = ({ query }: ProductListProps) => {
   const { data, isFetching } = useQuery({
     queryKey: ["products", query],
     queryFn: async () => {
@@ -69,7 +65,6 @@ export const ProductList = ({ query }: ProductListProps) => {
           totalPages={data.pagination.pageCount}
           currentPage={data.pagination.currentPage}
           className="sticky bottom-0 mb-5 bg-background"
-          route={Main}
         />
       )}
     </div>

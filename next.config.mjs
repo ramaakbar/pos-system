@@ -9,6 +9,9 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   output: "standalone",
+  experimental: {
+    typedRoutes: true,
+  },
 };
 
 export default nextConfig;

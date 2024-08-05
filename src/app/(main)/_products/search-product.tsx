@@ -3,32 +3,38 @@
 import { useEffect, useState } from "react";
 
 import { Input } from "@/components/ui/input";
-import { useDebounce } from "@/hooks/useDebounce";
+import useDebounce from "@/hooks/useDebounce";
 import { cn } from "@/lib/utils";
-import { Main } from "@/routes";
-import { usePush } from "@/routes/hooks";
 
-export const SearchProduct = ({
-  searchQuery,
-  className,
-}: {
-  searchQuery: string;
-  className: string;
-}) => {
-  const [query, setQuery] = useState(searchQuery);
-  const debounceValue = useDebounce(query, 500);
-  const router = usePush(Main);
+import { useProductPageQueryStates } from "../page-query";
+
+export const SearchProduct = ({ className }: { className: string }) => {
+  const [query, setQuery] = useProductPageQueryStates();
+  const [search, setSearch] = useState(query.search);
+
+  const [, cancel] = useDebounce(
+    () => {
+      if (search !== query.search) {
+        setQuery({
+          search: search,
+          page: 1,
+        });
+      }
+    },
+    1000,
+    [search]
+  );
 
   useEffect(() => {
-    router({}, { search: debounceValue });
-  }, [debounceValue]);
+    setSearch(query.search);
+  }, [query.search]);
 
   return (
     <Input
       className={cn("w-full", className)}
-      value={query}
+      value={search}
       placeholder="Search"
-      onChange={(e) => setQuery(e.target.value)}
+      onChange={(e) => setSearch(e.target.value)}
     />
   );
 };

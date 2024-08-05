@@ -9,8 +9,6 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Heading } from "@/components/ui/heading";
-import { Main } from "@/routes";
-import { useSearchParams } from "@/routes/hooks";
 
 import { CartDrawer } from "./_cart/cart-drawer";
 import { CartSection } from "./_cart/cart-section";
@@ -21,10 +19,6 @@ import { SearchProduct } from "./_products/search-product";
 import { UpdateStockDrawer } from "./_products/update-stock-drawer";
 
 export default function Home() {
-  const searchQuery = useSearchParams(Main).search || "";
-  const pageQuery = useSearchParams(Main).page || 1;
-  const categoryQuery = useSearchParams(Main).category || "";
-
   return (
     <div className="max-height-screen relative grid size-full grid-cols-12 gap-6">
       <div className="max-height-screen col-span-12 flex h-full flex-col md:col-span-8">
@@ -53,21 +47,9 @@ export default function Home() {
             </Drawer>
           </div>
         </div>
-        <SearchProduct className="mb-4" searchQuery={searchQuery} />
-        <CategoryFilterList
-          query={{
-            page: 1,
-            search: searchQuery,
-            category: categoryQuery,
-          }}
-        />
-        <ProductList
-          query={{
-            page: pageQuery,
-            search: searchQuery,
-            category: categoryQuery,
-          }}
-        />
+        <SearchProduct className="mb-4" />
+        <CategoryFilterList />
+        <ProductList />
         <div className="block p-4 md:hidden">
           <CartDrawer />
         </div>

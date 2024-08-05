@@ -14,8 +14,6 @@ import {
 } from "@/components/ui/drawer";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
-import { AuthLogin, Main, MainTransactions } from "@/routes";
-import { usePush } from "@/routes/hooks";
 import { User } from "@/server/db/schema/users";
 
 import { useLogoutMutation } from "../(auth)/authHooks";
@@ -26,45 +24,48 @@ type Props = {
 
 export const BottomNav = ({ user }: Props) => {
   const pathName = usePathname();
-  const pushToLogin = usePush(AuthLogin);
-
-  const routeLinks = [
-    {
-      name: "Home",
-      href: Main(),
-      icon: Home,
-    },
-    {
-      name: "Transactions",
-      href: MainTransactions(),
-      icon: Inbox,
-    },
-    {
-      name: "Customers",
-      href: "/customers",
-      icon: UserRound,
-    },
-  ];
 
   const { mutate: logout, isPending } = useLogoutMutation();
 
   return (
     <nav className="sticky bottom-0 z-0 border-t bg-white px-4">
       <div className="mx-auto flex max-w-4xl justify-between">
-        {routeLinks.map((route, index) => (
-          <Link href={route.href} key={route.href}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "flex h-auto flex-col capitalize",
-                pathName === route.href ? "text-blue-600" : ""
-              )}
-            >
-              <route.icon className="size-5" />
-              {route.name}
-            </Button>
-          </Link>
-        ))}
+        <Link href={"/"}>
+          <Button
+            variant="ghost"
+            className={cn(
+              "flex h-auto flex-col capitalize",
+              pathName === "/" ? "text-blue-600" : ""
+            )}
+          >
+            <Home className="size-5" />
+            Home
+          </Button>
+        </Link>
+        <Link href={"/transactions"}>
+          <Button
+            variant="ghost"
+            className={cn(
+              "flex h-auto flex-col capitalize",
+              pathName === "/transactions" ? "text-blue-600" : ""
+            )}
+          >
+            <Inbox className="size-5" />
+            Transactions
+          </Button>
+        </Link>
+        <Link href={"/customers"}>
+          <Button
+            variant="ghost"
+            className={cn(
+              "flex h-auto flex-col capitalize",
+              pathName === "/customers" ? "text-blue-600" : ""
+            )}
+          >
+            <UserRound className="size-5" />
+            Customers
+          </Button>
+        </Link>
         <Drawer>
           <DrawerTrigger asChild>
             <Button variant="ghost" className="flex h-auto flex-col capitalize">

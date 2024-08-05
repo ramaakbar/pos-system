@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
@@ -11,23 +10,21 @@ import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
 import { numberToRupiah } from "@/lib/utils";
-import { MainTransactions } from "@/routes";
-import { useSearchParams } from "@/routes/hooks";
 
 import { PaginatedList } from "../../../components/paginated-list";
+import { useTransactionPageQueryStates } from "./page-query";
 import { TransactionDetailDrawer } from "./transaction-detail-drawer";
 
 export default function Page() {
-  const searchQuery = useSearchParams(MainTransactions).search || "";
-  const pageQuery = useSearchParams(MainTransactions).page || 1;
+  const [query, setQuery] = useTransactionPageQueryStates();
 
   const { data, isFetching } = useQuery({
-    queryKey: ["transactions", pageQuery, searchQuery],
+    queryKey: ["transactions", query.search, query.page],
     queryFn: async () => {
       const { data, error } = await client.api.transactions.index.get({
         query: {
-          search: searchQuery,
-          page: pageQuery,
+          search: query.search,
+          page: query.page,
         },
       });
 
@@ -37,6 +34,12 @@ export default function Page() {
       return data;
     },
   });
+
+  const handleCloseDrawer = () => {
+    setQuery({
+      transaction: "",
+    });
+  };
 
   return (
     <div className="max-height-screen flex flex-col px-4 pt-4">
@@ -62,15 +65,10 @@ export default function Page() {
         {!isFetching &&
           data &&
           data.data.map((transaction) => (
-            <Link
-              href={MainTransactions(
-                {},
-                {
-                  transaction: transaction.id,
-                }
-              )}
+            <div
+              onClick={() => setQuery({ transaction: transaction.id })}
               key={transaction.id}
-              className="col-span-12 rounded-lg border p-4 shadow-sm md:col-span-6"
+              className="col-span-12 cursor-pointer rounded-lg border p-4 shadow-sm md:col-span-6"
             >
               <div className="flex flex-col lg:flex-row lg:justify-between">
                 <Heading variant={"h3"}>{transaction.code}</Heading>
@@ -84,16 +82,20 @@ export default function Page() {
                 <Text>{numberToRupiah(transaction.amount)}</Text>
                 <Text>{new Date(transaction.createdAt).toDateString()}</Text>
               </div>
-            </Link>
+            </div>
           ))}
       </div>
-      {data && <TransactionDetailDrawer />}
+      {data && (
+        <TransactionDetailDrawer
+          transactionId={query.transaction}
+          handleClose={handleCloseDrawer}
+        />
+      )}
       {data && (
         <PaginatedList
           totalPages={data.pagination.pageCount}
           currentPage={data.pagination.currentPage}
           className="mb-5"
-          route={MainTransactions}
         />
       )}
     </div>

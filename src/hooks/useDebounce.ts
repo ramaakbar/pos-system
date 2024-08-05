@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
+import { DependencyList, useEffect } from "react";
 
-export function useDebounce<T>(value: T, delay?: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+import useTimeoutFn from "./useTimeoutFn";
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay ?? 500);
+export type UseDebounceReturn = [() => boolean | null, () => void];
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [value, delay]);
+export default function useDebounce(
+  fn: Function,
+  ms: number = 0,
+  deps: DependencyList = []
+): UseDebounceReturn {
+  const [isReady, cancel, reset] = useTimeoutFn(fn, ms);
 
-  return debouncedValue;
+  useEffect(reset, deps);
+
+  return [isReady, cancel];
 }

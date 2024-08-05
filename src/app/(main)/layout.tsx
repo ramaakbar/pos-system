@@ -1,8 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { LoadingScreen } from "@/components/loading-screen";
-import { AuthLogin } from "@/routes";
-import { usePush } from "@/routes/hooks";
 
 import { useGetCurrentUserQuery } from "../(auth)/authHooks";
 import { BottomNav } from "./bottom-nav";
@@ -12,7 +12,7 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pushToLogin = usePush(AuthLogin);
+  const router = useRouter();
 
   const { data: user, isFetching, isError } = useGetCurrentUserQuery();
 
@@ -21,7 +21,7 @@ export default function MainLayout({
   }
 
   if ((!isFetching && !user) || isError) {
-    pushToLogin({});
+    router.push("/login");
   }
 
   if (!isFetching && user) {

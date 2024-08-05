@@ -1,8 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { LoadingScreen } from "@/components/loading-screen";
-import { Main } from "@/routes";
-import { usePush } from "@/routes/hooks";
 
 import { useGetCurrentUserQuery } from "./authHooks";
 
@@ -11,7 +11,7 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pushToMain = usePush(Main);
+  const router = useRouter();
 
   const { data: user, isFetching } = useGetCurrentUserQuery();
 
@@ -20,7 +20,7 @@ export default function AuthLayout({
   }
 
   if (!isFetching && user) {
-    pushToMain({});
+    router.push("/");
   }
 
   return <>{children}</>;

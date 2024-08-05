@@ -1,19 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { z } from "zod";
 
 import { Badge } from "@/components/ui/badge";
 import { client } from "@/lib/client";
-import { Main } from "@/routes";
-import { usePush } from "@/routes/hooks";
 
-import { Route } from "../page.info";
+import { useProductPageQueryStates } from "../page-query";
 
-type Props = {
-  query: z.infer<typeof Route.search>;
-};
-
-export const CategoryFilterList = ({ query }: Props) => {
-  const pushMain = usePush(Main);
+export const CategoryFilterList = () => {
+  const [query, setQuery] = useProductPageQueryStates();
 
   const { data, isFetching } = useQuery({
     queryKey: ["categories"],
@@ -34,13 +27,10 @@ export const CategoryFilterList = ({ query }: Props) => {
           className="cursor-pointer"
           variant={query.category === "" ? "secondary" : "outline"}
           onClick={() =>
-            pushMain(
-              {},
-              {
-                ...query,
-                category: undefined,
-              }
-            )
+            setQuery({
+              page: 1,
+              category: "",
+            })
           }
         >
           All
@@ -55,13 +45,10 @@ export const CategoryFilterList = ({ query }: Props) => {
               }
               key={category.id}
               onClick={() =>
-                pushMain(
-                  {},
-                  {
-                    ...query,
-                    category: category.name,
-                  }
-                )
+                setQuery({
+                  page: 1,
+                  category: category.name,
+                })
               }
             >
               {category.name}

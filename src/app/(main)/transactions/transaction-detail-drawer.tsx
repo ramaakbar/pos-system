@@ -7,14 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
-import { MainTransactions } from "@/routes";
-import { usePush, useSearchParams } from "@/routes/hooks";
 
 import { TransactionDetail } from "./transaction-detail";
 
-export const TransactionDetailDrawer = () => {
-  const routerMainTransaction = usePush(MainTransactions);
-  const transactionId = useSearchParams(MainTransactions).transaction || "";
+export const TransactionDetailDrawer = ({
+  transactionId,
+  handleClose,
+}: {
+  transactionId: string;
+  handleClose: () => void;
+}) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -38,18 +40,7 @@ export const TransactionDetailDrawer = () => {
   });
 
   return (
-    <Drawer
-      open={open}
-      onOpenChange={setOpen}
-      onClose={() =>
-        routerMainTransaction(
-          {},
-          {
-            transaction: undefined,
-          }
-        )
-      }
-    >
+    <Drawer open={open} onOpenChange={setOpen} onClose={handleClose}>
       <DrawerTrigger asChild>
         <Button variant="ghost" className="hidden">
           Transaction

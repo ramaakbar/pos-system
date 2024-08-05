@@ -1,7 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-
 import {
   Pagination,
   PaginationContent,
@@ -13,17 +11,11 @@ import {
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 
-type RouteFunction = (
-  params?: Record<string, string | number>,
-  query?: Record<string, string | number>
-) => string;
-
 type Props = {
   totalPages: number;
   totalPagesToDisplay?: number;
   currentPage: number;
   className?: string;
-  route: RouteFunction;
 };
 
 export const PaginatedList = ({
@@ -31,11 +23,7 @@ export const PaginatedList = ({
   totalPagesToDisplay = 5,
   currentPage,
   className,
-  route,
 }: Props) => {
-  const searchParams = useSearchParams();
-  const existingQuery = Object.fromEntries(searchParams.entries());
-
   const showLeftEllipsis = currentPage - 1 > totalPagesToDisplay / 2;
   const showRightEllipsis =
     totalPages - currentPage + 1 > totalPagesToDisplay / 2;
@@ -70,13 +58,7 @@ export const PaginatedList = ({
     return pageNumbers.map((pageNumber) => (
       <PaginationItem key={pageNumber}>
         <PaginationLink
-          href={route(
-            {},
-            {
-              ...existingQuery,
-              page: pageNumber,
-            }
-          )}
+          href={{ query: { page: pageNumber } }}
           isActive={pageNumber === currentPage}
         >
           {pageNumber}
@@ -90,17 +72,12 @@ export const PaginatedList = ({
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            href={
-              currentPage !== 1
-                ? route(
-                    {},
-                    {
-                      ...existingQuery,
-                      page: currentPage - 1,
-                    }
-                  )
-                : ""
-            }
+            href={{
+              query: {
+                page: currentPage !== 1 ? currentPage - 1 : "",
+              },
+            }}
+            onClick={(e) => (currentPage === 1 ? e.preventDefault() : null)}
             aria-disabled={currentPage === 1}
           />
         </PaginationItem>
@@ -117,16 +94,13 @@ export const PaginatedList = ({
         )}
         <PaginationItem>
           <PaginationNext
-            href={
-              currentPage !== totalPages
-                ? route(
-                    {},
-                    {
-                      ...existingQuery,
-                      page: currentPage + 1,
-                    }
-                  )
-                : ""
+            href={{
+              query: {
+                page: currentPage !== totalPages ? currentPage + 1 : "",
+              },
+            }}
+            onClick={(e) =>
+              currentPage === totalPages ? e.preventDefault() : null
             }
             aria-disabled={currentPage === totalPages}
           />

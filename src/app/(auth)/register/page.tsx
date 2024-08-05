@@ -3,7 +3,6 @@ import { ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
-import { AuthLogin } from "@/routes";
 
 import { RegisterForm } from "./register-form";
 
@@ -12,7 +11,7 @@ export default function RegisterPage() {
     <div className="flex h-full items-center justify-center">
       <div className="absolute right-0 top-0 p-4">
         <Button variant={"ghost"} asChild={true}>
-          <Link href={AuthLogin()}>
+          <Link href={"/login"}>
             Login <ChevronRight className="size-4" />
           </Link>
         </Button>
