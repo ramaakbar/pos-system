@@ -22,8 +22,8 @@ const drivers = {
   r2: () =>
     new S3Driver({
       credentials: {
-        accessKeyId: serverEnvs.R2_ACCESS_KEY,
-        secretAccessKey: serverEnvs.R2_ACCESS_SECRET,
+        accessKeyId: serverEnvs.R2_ACCESS_KEY as string,
+        secretAccessKey: serverEnvs.R2_ACCESS_SECRET as string,
       },
 
       endpoint: serverEnvs.R2_ENDPOINT,
