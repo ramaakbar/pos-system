@@ -41,7 +41,7 @@ export const BottomNav = ({ user }: Props) => {
     },
     {
       name: "Customers",
-      href: "/customer",
+      href: "/customers",
       icon: UserRound,
     },
   ];
