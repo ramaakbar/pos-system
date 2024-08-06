@@ -78,29 +78,29 @@ export const BottomNav = ({ user }: Props) => {
               <DrawerHeader>
                 <DrawerTitle>Setting</DrawerTitle>
               </DrawerHeader>
-              <div className="p-4 pb-0">
+              <div className="flex flex-col gap-4 p-4 pb-0">
                 <Text>{user.email}</Text>
-                <div className="flex gap-4">
-                  {user.role === "Admin" ? (
-                    <Link href={"/dashboard"}>
-                      <Button>Dashboard</Button>
-                    </Link>
-                  ) : null}
-
-                  <Button onClick={() => logout()} disabled={isPending}>
-                    {" "}
-                    {isPending ? (
-                      <>
-                        <Loader2
-                          className={"mr-2 inline size-4 animate-spin"}
-                        />
-                        Loading...
-                      </>
-                    ) : (
-                      <>Logout</>
-                    )}
-                  </Button>
-                </div>
+                <Button variant={"secondary"} asChild>
+                  <Link href={"/dashboard"} className="w-full">
+                    Go to dashboard
+                  </Link>
+                </Button>
+                <Button
+                  variant={"secondary"}
+                  className="w-full"
+                  onClick={() => logout()}
+                  disabled={isPending}
+                >
+                  {" "}
+                  {isPending ? (
+                    <>
+                      <Loader2 className={"mr-2 inline size-4 animate-spin"} />
+                      Loading...
+                    </>
+                  ) : (
+                    <>Logout</>
+                  )}
+                </Button>
               </div>
             </div>
           </DrawerContent>
