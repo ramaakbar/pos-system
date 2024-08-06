@@ -80,17 +80,27 @@ export const BottomNav = ({ user }: Props) => {
               </DrawerHeader>
               <div className="p-4 pb-0">
                 <Text>{user.email}</Text>
-                <Button onClick={() => logout()} disabled={isPending}>
-                  {" "}
-                  {isPending ? (
-                    <>
-                      <Loader2 className={"mr-2 inline size-4 animate-spin"} />
-                      Loading...
-                    </>
-                  ) : (
-                    <>Logout</>
-                  )}
-                </Button>
+                <div className="flex gap-4">
+                  {user.role === "Admin" ? (
+                    <Link href={"/dashboard"}>
+                      <Button>Dashboard</Button>
+                    </Link>
+                  ) : null}
+
+                  <Button onClick={() => logout()} disabled={isPending}>
+                    {" "}
+                    {isPending ? (
+                      <>
+                        <Loader2
+                          className={"mr-2 inline size-4 animate-spin"}
+                        />
+                        Loading...
+                      </>
+                    ) : (
+                      <>Logout</>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </DrawerContent>
