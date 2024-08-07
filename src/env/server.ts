@@ -7,6 +7,8 @@ export const serverEnvs = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     DB_URL: z.string().default("postgres://postgres:@localhost:5432/pos"),
+    REFRESH_TOKEN_SECRET: z.string(),
+    ACCESS_TOKEN_SECRET: z.string(),
     DRIVE_DISK: z.enum(["fs", "r2"]).default("fs"),
     R2_ACCESS_KEY: z.string().optional(),
     R2_ACCESS_SECRET: z.string().optional(),

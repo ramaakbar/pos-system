@@ -3,7 +3,13 @@ import postgres from "postgres";
 
 import { serverEnvs } from "@/env/server";
 
-import { sessionsTable } from "./schema/sessions";
+import { categoriesTable } from "./schema/categories";
+import { customersTable } from "./schema/customers";
+import { productsTable } from "./schema/products";
+import {
+  detailTransactionsTable,
+  headerTransactionsTable,
+} from "./schema/transactions";
 import { usersTable } from "./schema/users";
 
 const connection = postgres(serverEnvs.DB_URL, {
@@ -11,7 +17,14 @@ const connection = postgres(serverEnvs.DB_URL, {
 });
 
 export const db = drizzle(connection, {
-  schema: { usersTable, sessionsTable },
+  schema: {
+    usersTable,
+    customersTable,
+    categoriesTable,
+    productsTable,
+    headerTransactionsTable,
+    detailTransactionsTable,
+  },
 });
 
 export type DB =
