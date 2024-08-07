@@ -16,7 +16,7 @@ function productFactory(ctg: Array<typeof categoriesTable.$inferSelect>) {
     categoryId: ctg[randomInt(ctg.length)].id,
     description: faker.commerce.productDescription(),
     price: parseInt(faker.commerce.price({ min: 1000, max: 20000, dec: 0 })),
-    media: "/uploads/cookie-sample.jpg",
+    media: "/cookie-sample.jpg",
     quantity: faker.number.int({ min: 0, max: 30 }),
     createdAt: date,
     updatedAt: date,

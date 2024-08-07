@@ -4,15 +4,8 @@ import { db as DbType } from "..";
 import { categoriesTable } from "../schema/categories";
 
 function categoryFactory() {
-  const date = faker.date.between({
-    from: "2023-01-01T00:00:00.000Z",
-    to: "2024-01-31T00:00:00.000Z",
-  });
-
   const categoryObj: typeof categoriesTable.$inferInsert = {
     name: faker.word.adjective(),
-    createdAt: date.toString(),
-    updatedAt: date.toString(),
   };
   return categoryObj;
 }
