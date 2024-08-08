@@ -27,7 +27,7 @@ const createAuthTokens = (
     }
   );
   const accessToken = sign({ user: user }, serverEnvs.ACCESS_TOKEN_SECRET, {
-    expiresIn: "1min",
+    expiresIn: "15min",
   });
 
   return { refreshToken, accessToken };

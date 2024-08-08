@@ -40,9 +40,9 @@ export const authRoutes = new Elysia({
         throw new Error("Invalid Credentials");
       }
 
-      sendAuthCookies(cookie, user);
-
       const { password: pass, ...userWithoutPass } = user;
+
+      sendAuthCookies(cookie, userWithoutPass);
 
       return {
         success: true,
