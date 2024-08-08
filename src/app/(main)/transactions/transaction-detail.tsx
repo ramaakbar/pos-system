@@ -103,6 +103,7 @@ export const TransactionDetail = ({ transaction }: Props) => {
         <div className="mb-1">
           <Label>Transaction Status</Label>
           <NativeSelect
+            className="w-full"
             data={transactionStatusEnum}
             value={transactionStatus}
             onChange={(e) => {
@@ -126,6 +127,7 @@ export const TransactionDetail = ({ transaction }: Props) => {
         <div>
           <Label>Payment Status</Label>
           <NativeSelect
+            className="w-full"
             data={paymentStatusEnum}
             value={paymentStatus}
             onChange={(e) => {

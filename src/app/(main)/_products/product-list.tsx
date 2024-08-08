@@ -38,7 +38,7 @@ export const ProductList = () => {
   };
 
   return (
-    <div className="flex flex-1 flex-col overflow-auto">
+    <div className="flex flex-1 flex-col justify-between overflow-auto">
       {isFetching && (
         <div className="my-4 flex flex-1 items-center justify-center">
           <Loader2 className={"size-16 animate-spin"} />

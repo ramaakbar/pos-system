@@ -164,7 +164,11 @@ export const CheckoutDrawer = ({ items }: Props) => {
                           <FormLabel>Payment Method</FormLabel>
                         </div>
                         <FormControl>
-                          <NativeSelect data={paymentMethodEnum} {...field} />
+                          <NativeSelect
+                            className="w-full"
+                            data={paymentMethodEnum}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </div>

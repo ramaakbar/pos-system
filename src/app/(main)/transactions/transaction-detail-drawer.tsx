@@ -37,6 +37,7 @@ export const TransactionDetailDrawer = ({
       }
       return data;
     },
+    enabled: open,
   });
 
   return (

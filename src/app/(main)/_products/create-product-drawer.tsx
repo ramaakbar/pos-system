@@ -132,6 +132,7 @@ export const CreateProductDrawer = ({}: Props) => {
                       <FormLabel>Category</FormLabel>
                       <FormControl>
                         <NativeSelect
+                          className="w-full"
                           onClick={() => refetch()}
                           data={categories?.data!}
                           loading={categoryLoading}
