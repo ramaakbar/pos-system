@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 import { useProductPageQueryStates } from "../page-query";
 
-export const SearchProduct = ({ className }: { className: string }) => {
+export const SearchProduct = ({ className }: { className?: string }) => {
   const [query, setQuery] = useProductPageQueryStates();
   const [search, setSearch] = useState(query.search);
 
