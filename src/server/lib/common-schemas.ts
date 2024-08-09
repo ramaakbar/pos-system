@@ -9,8 +9,7 @@ export const idParamSchema = t.Object({
 export const paginationQuerySchema = t.Partial(
   t.Object({
     search: t.String(),
-    sort: t.Union([t.Literal("createdAt")]),
-    order: t.Union([t.Literal("asc"), t.Literal("desc")]),
+    sort: t.String(),
     page: t.Number({
       minimum: 0,
     }),

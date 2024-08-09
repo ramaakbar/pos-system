@@ -1,4 +1,4 @@
-import { asc, count, desc, eq, getTableColumns, ilike, SQL } from "drizzle-orm";
+import { count, eq, getTableColumns, ilike, SQL } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { db } from "@/server/db";
@@ -43,7 +43,7 @@ export const transactionsRoutes = new Elysia({
   .get(
     "/",
     async ({ query, set }) => {
-      const { search, sort, order, page = 1, limit = 10 } = query;
+      const { search, sort, page = 1, limit = 10 } = query;
 
       const filter: SQL | undefined = search
         ? ilike(headerTransactionsTable.code, `%${search}%`)
@@ -101,12 +101,12 @@ export const transactionsRoutes = new Elysia({
           eq(headerTransactionsTable.customerId, customersTable.id)
         )
         .limit(limit)
-        .offset(limit * (page - 1))
-        .orderBy(
-          order?.toUpperCase() === "DESC"
-            ? desc(headerTransactionsTable[sort ?? "createdAt"])
-            : asc(headerTransactionsTable[sort ?? "createdAt"])
-        );
+        .offset(limit * (page - 1));
+      // .orderBy(
+      //   order?.toUpperCase() === "DESC"
+      //     ? desc(headerTransactionsTable[sort ?? "createdAt"])
+      //     : asc(headerTransactionsTable[sort ?? "createdAt"])
+      // );
 
       return {
         success: true,

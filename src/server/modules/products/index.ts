@@ -14,12 +14,14 @@ import Elysia from "elysia";
 import { db } from "@/server/db";
 import { categoriesTable } from "@/server/db/schema/categories";
 import {
+  Product,
   productSchema,
   productsTable,
   returningProductSchema,
 } from "@/server/db/schema/products";
 import {
   successResponseWithDataSchema,
+  successResponseWithoutDataSchema,
   successResponseWithPaginationSchema,
 } from "@/server/lib/common-responses";
 import { idParamSchema } from "@/server/lib/common-schemas";
@@ -42,7 +44,18 @@ export const productsRoutes = new Elysia({
   .get(
     "/",
     async ({ query, set }) => {
-      const { search, sort, order, page = 1, limit = 20, category } = query;
+      const {
+        search,
+        sort = "createdAt.asc",
+        page = 1,
+        limit = 20,
+        category,
+      } = query;
+
+      const [sortBy, sortOrder] = (sort?.split(".").filter(Boolean) ?? [
+        "createdAt",
+        "desc",
+      ]) as [keyof Omit<Product, "category">, "asc" | "desc"];
 
       const filter: Array<SQL> = [];
 
@@ -105,9 +118,9 @@ export const productsRoutes = new Elysia({
         .limit(limit)
         .offset(limit * (page - 1))
         .orderBy(
-          order?.toUpperCase() === "DESC"
-            ? desc(productsTable[sort ?? "createdAt"])
-            : asc(productsTable[sort ?? "createdAt"])
+          sortOrder.toUpperCase() === "DESC"
+            ? desc(productsTable[sortBy])
+            : asc(productsTable[sortBy])
         );
 
       for (const product of products) {
@@ -343,6 +356,30 @@ export const productsRoutes = new Elysia({
       body: updateProductDtoSchema,
       response: {
         200: successResponseWithDataSchema(returningProductSchema),
+      },
+    }
+  )
+  .delete(
+    "/:id",
+    async ({ params }) => {
+      const [product] = await db
+        .delete(productsTable)
+        .where(eq(productsTable.id, params.id))
+        .returning({
+          id: productsTable.id,
+          media: productsTable.media,
+        });
+
+      await disk.delete(product.media);
+
+      return {
+        success: true,
+      };
+    },
+    {
+      params: idParamSchema,
+      response: {
+        200: successResponseWithoutDataSchema,
       },
     }
   );

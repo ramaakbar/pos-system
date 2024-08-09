@@ -1,4 +1,4 @@
-import { Skeleton } from "../skeleton";
+import { Skeleton } from "./skeleton";
 import {
   Table,
   TableBody,
@@ -8,17 +8,11 @@ import {
   TableRow,
 } from "./table";
 
-export default function TableSkeleton({
-  col,
-  row,
-}: {
-  col: number;
-  row: number;
-}) {
+export const TableSkeleton = ({ col, row }: { col: number; row: number }) => {
   return (
-    <div className="rounded-md border">
+    <div className="overflow-auto rounded-md border">
       <Table>
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-10 bg-secondary">
           <TableRow>
             {[...Array(col)].map((data, i) => (
               <TableHead key={i}>Column</TableHead>
@@ -39,4 +33,4 @@ export default function TableSkeleton({
       </Table>
     </div>
   );
-}
+};

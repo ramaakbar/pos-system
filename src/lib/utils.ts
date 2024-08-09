@@ -1,5 +1,6 @@
 import type { ClassValue } from "clsx";
 import { TLiteral, TUnion, Type } from "@sinclair/typebox";
+import { SortingState } from "@tanstack/react-table";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -38,3 +39,29 @@ export function LiteralUnion<T extends string[]>(
 ): TLiteralUnion<T> {
   return Type.Union(values.map((value) => Type.Literal(value))) as never;
 }
+
+export function formatDate(
+  date: Date | string | number,
+  opts: Intl.DateTimeFormatOptions = {}
+) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: opts.month ?? "long",
+    day: opts.day ?? "numeric",
+    year: opts.year ?? "numeric",
+    ...opts,
+  }).format(new Date(date));
+}
+
+export const stateToSortBy = (sorting: SortingState | undefined) => {
+  if (!sorting || sorting.length == 0) return "createdAt.asc";
+  const sort = sorting[0];
+
+  return `${sort.id}.${sort.desc ? "desc" : "asc"}` as const;
+};
+
+export const sortByToState = (sortBy: string | undefined) => {
+  if (!sortBy) return [];
+
+  const [id, desc] = sortBy.split(".");
+  return [{ id, desc: desc === "desc" }];
+};
