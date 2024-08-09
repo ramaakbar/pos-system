@@ -18,7 +18,7 @@ import { twMerge } from "tailwind-merge";
 import { Button } from "./button";
 
 type DropzoneInputProps = Omit<ComponentProps<"input">, "value"> & {
-  value: File | null;
+  value: File | undefined;
   name: string;
   maxFiles?: number;
   maxSize?: number;
@@ -97,7 +97,7 @@ export const DropzoneInput = forwardRef<HTMLInputElement, DropzoneInputProps>(
           >
             {files?.map((file, i) => (
               <div key={i} className="flex w-full items-center justify-between">
-                <p>{file.path}</p>
+                <p className="truncate">{file.path}</p>
                 <Button
                   variant="ghost"
                   size="sm"
