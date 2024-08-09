@@ -29,12 +29,15 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
+import { cn } from "@/lib/utils";
 import { createProductDtoSchema } from "@/server/modules/products/schema";
 
-type Props = {};
+type Props = {
+  className?: string;
+};
 
-export const CreateProductDrawer = ({}: Props) => {
-  const [open, setOpen] = useState(false);
+export const CreateProductDrawer = ({ className }: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
 
   const form = useForm<UnwrapSchema<typeof createProductDtoSchema>>({
     resolver: typeboxResolver(createProductDtoSchema),
@@ -66,7 +69,7 @@ export const CreateProductDrawer = ({}: Props) => {
       });
       form.reset();
       toast.success("Product created");
-      setOpen(false);
+      setIsOpen(false);
     },
   });
 
@@ -94,9 +97,9 @@ export const CreateProductDrawer = ({}: Props) => {
   }, [form, categories?.data]);
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <Button variant="default" size={"sm"} className="w-full">
+        <Button variant="default" size={"sm"} className={cn(className)}>
           Create Product
         </Button>
       </DrawerTrigger>

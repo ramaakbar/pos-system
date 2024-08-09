@@ -40,7 +40,7 @@ export default function Home() {
                   </DrawerHeader>
                   <div className="flex gap-4 p-4 pb-0">
                     <UpdateStockDrawer />
-                    <CreateProductDrawer />
+                    <CreateProductDrawer className="w-full" />
                   </div>
                 </div>
               </DrawerContent>
