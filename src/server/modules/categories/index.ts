@@ -1,10 +1,20 @@
-import { eq } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, SQL } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import { db } from "@/server/db";
-import { categoriesTable, categorySchema } from "@/server/db/schema/categories";
-import { successResponseWithDataSchema } from "@/server/lib/common-responses";
-import { idParamSchema } from "@/server/lib/common-schemas";
+import {
+  categoriesTable,
+  Category,
+  categorySchema,
+} from "@/server/db/schema/categories";
+import {
+  successResponseWithDataSchema,
+  successResponseWithoutDataSchema,
+} from "@/server/lib/common-responses";
+import {
+  idParamSchema,
+  paginationQuerySchema,
+} from "@/server/lib/common-schemas";
 import { ctx } from "@/server/plugins/context";
 
 import {
@@ -22,8 +32,31 @@ export const categoriesRoute = new Elysia({
   .use(ctx)
   .get(
     "/",
-    async (ctx) => {
-      const categories = await db.select().from(categoriesTable);
+    async ({ query }) => {
+      const { search, sort = "createdAt.asc" } = query;
+
+      const [sortBy, sortOrder] = (sort?.split(".").filter(Boolean) ?? [
+        "createdAt",
+        "desc",
+      ]) as [keyof Category, "asc" | "desc"];
+
+      const filter: Array<SQL> = [];
+
+      if (search) filter.push(ilike(categoriesTable.name, `%${search}%`));
+
+      const where = filter.length > 0 ? and(...filter) : undefined;
+
+      const categories = await db
+        .select()
+        .from(categoriesTable)
+        .where(where)
+        // .limit(limit)
+        // .offset(limit * (page - 1))
+        .orderBy(
+          sortOrder.toUpperCase() === "DESC"
+            ? desc(categoriesTable[sortBy])
+            : asc(categoriesTable[sortBy])
+        );
 
       return {
         success: true,
@@ -31,6 +64,7 @@ export const categoriesRoute = new Elysia({
       };
     },
     {
+      query: paginationQuerySchema,
       response: {
         200: successResponseWithDataSchema(t.Array(categorySchema)),
       },
@@ -144,6 +178,22 @@ export const categoriesRoute = new Elysia({
       body: createCategoryDtoSchema,
       response: {
         200: successResponseWithDataSchema(categorySchema),
+      },
+    }
+  )
+  .delete(
+    "/:id",
+    async ({ params }) => {
+      await db.delete(categoriesTable).where(eq(categoriesTable.id, params.id));
+
+      return {
+        success: true,
+      };
+    },
+    {
+      params: idParamSchema,
+      response: {
+        200: successResponseWithoutDataSchema,
       },
     }
   );

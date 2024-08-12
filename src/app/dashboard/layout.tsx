@@ -27,6 +27,11 @@ const dashboardLink: Array<{
     link: "/dashboard/products",
   },
   {
+    id: 2,
+    name: "Categories",
+    link: "/dashboard/categories",
+  },
+  {
     id: 3,
     name: "Orders",
     link: "/dashboard/orders",

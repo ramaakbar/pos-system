@@ -11,7 +11,9 @@ export const CategoryFilterList = () => {
   const { data, isFetching } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data, error } = await client.api.categories.index.get();
+      const { data, error } = await client.api.categories.index.get({
+        query: {},
+      });
 
       if (error) {
         throw error.value;

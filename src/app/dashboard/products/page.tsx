@@ -12,8 +12,8 @@ import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { client } from "@/lib/client";
 import { sortByToState, stateToSortBy } from "@/lib/utils";
 
+import { SearchProduct } from "../search-input";
 import { getProductColumns } from "./columns";
-import { SearchProduct } from "./search-input";
 
 export default function Page() {
   const [query, setQuery] = useQueryStates(
@@ -51,7 +51,9 @@ export default function Page() {
   const { data: categories, isPending: categoryLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data, error } = await client.api.categories.index.get();
+      const { data, error } = await client.api.categories.index.get({
+        query: {},
+      });
 
       if (error) {
         throw error.value;
