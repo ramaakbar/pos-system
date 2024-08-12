@@ -1,21 +1,17 @@
 import { and, asc, desc, eq, ilike, SQL } from "drizzle-orm";
-import Elysia, { t } from "elysia";
+import { Hono } from "hono";
+import { every } from "hono/combine";
+import { HTTPException } from "hono/http-exception";
 
+import { Env } from "@/server";
 import { db } from "@/server/db";
-import {
-  categoriesTable,
-  Category,
-  categorySchema,
-} from "@/server/db/schema/categories";
-import {
-  successResponseWithDataSchema,
-  successResponseWithoutDataSchema,
-} from "@/server/lib/common-responses";
+import { categoriesTable, Category } from "@/server/db/schema/categories";
 import {
   idParamSchema,
   paginationQuerySchema,
 } from "@/server/lib/common-schemas";
-import { ctx } from "@/server/plugins/context";
+import { validator } from "@/server/lib/utils";
+import { adminGuard, authGuard } from "@/server/middlewares/auth";
 
 import {
   checkDuplicateFieldValue,
@@ -23,177 +19,124 @@ import {
 } from "../common/service";
 import { createCategoryDtoSchema } from "./schema";
 
-export const categoriesRoute = new Elysia({
-  prefix: "/categories",
-  detail: {
-    tags: ["Categories"],
-  },
-})
-  .use(ctx)
-  .get(
-    "/",
-    async ({ query }) => {
-      const { search, sort = "createdAt.asc" } = query;
+export const categoriesRoutes = new Hono<Env>()
+  .get("/", validator("query", paginationQuerySchema), async (ctx) => {
+    const { search, sort } = ctx.req.valid("query");
 
-      const [sortBy, sortOrder] = (sort?.split(".").filter(Boolean) ?? [
-        "createdAt",
-        "desc",
-      ]) as [keyof Category, "asc" | "desc"];
+    const [sortBy, sortOrder] = sort.split(".").filter(Boolean) as [
+      keyof Category,
+      "asc" | "desc",
+    ];
 
-      const filter: Array<SQL> = [];
+    const filter: Array<SQL> = [];
 
-      if (search) filter.push(ilike(categoriesTable.name, `%${search}%`));
+    if (search) filter.push(ilike(categoriesTable.name, `%${search}%`));
 
-      const where = filter.length > 0 ? and(...filter) : undefined;
+    const where = filter.length > 0 ? and(...filter) : undefined;
 
-      const categories = await db
-        .select()
-        .from(categoriesTable)
-        .where(where)
-        // .limit(limit)
-        // .offset(limit * (page - 1))
-        .orderBy(
-          sortOrder.toUpperCase() === "DESC"
-            ? desc(categoriesTable[sortBy])
-            : asc(categoriesTable[sortBy])
-        );
+    const categories = await db
+      .select()
+      .from(categoriesTable)
+      .where(where)
+      // .limit(limit)
+      // .offset(limit * (page - 1))
+      .orderBy(
+        sortOrder.toUpperCase() === "DESC"
+          ? desc(categoriesTable[sortBy])
+          : asc(categoriesTable[sortBy])
+      );
 
-      return {
-        success: true,
-        data: categories,
-      };
-    },
-    {
-      query: paginationQuerySchema,
-      response: {
-        200: successResponseWithDataSchema(t.Array(categorySchema)),
-      },
-    }
-  )
-  .get(
-    "/:id",
-    async ({ params, set }) => {
-      const id = params.id;
-
-      const [category] = await db
-        .select()
-        .from(categoriesTable)
-        .where(eq(categoriesTable.id, id));
-
-      if (!category) {
-        set.status = "Bad Request";
-        throw new Error("Category not found");
-      }
-
-      return {
-        success: true,
-        data: category,
-      };
-    },
-    {
-      params: idParamSchema,
-      response: {
-        200: successResponseWithDataSchema(categorySchema),
-      },
-    }
-  )
-  .guard({
-    isAuth: true,
-    isAdmin: true,
+    return ctx.json({ data: categories }, 200);
   })
-  .post(
-    "/",
-    async ({ body, set }) => {
-      const { name } = body;
+  .get("/:id", validator("param", idParamSchema), async (ctx) => {
+    const param = ctx.req.valid("param");
 
-      const [categoryFound] = await db
-        .select()
-        .from(categoriesTable)
-        .where(eq(categoriesTable.name, name));
+    const [category] = await db
+      .select()
+      .from(categoriesTable)
+      .where(eq(categoriesTable.id, param.id));
 
-      if (categoryFound) {
-        set.status = "Bad Request";
-        throw new Error("Category already exists with the name");
-      }
-
-      const [category] = await db
-        .insert(categoriesTable)
-        .values({
-          name,
-        })
-        .returning();
-
-      return {
-        success: true,
-        data: category,
-      };
-    },
-    {
-      body: createCategoryDtoSchema,
-      response: {
-        200: successResponseWithDataSchema(categorySchema),
-      },
+    if (!category) {
+      throw new HTTPException(404, { message: "Category not found" });
     }
-  )
+
+    return ctx.json({ data: category }, 200);
+  })
+  .use(every(authGuard, adminGuard))
+  .post("/", validator("json", createCategoryDtoSchema), async (ctx) => {
+    const body = ctx.req.valid("json");
+
+    const [categoryFound] = await db
+      .select()
+      .from(categoriesTable)
+      .where(eq(categoriesTable.name, body.name));
+
+    if (categoryFound) {
+      throw new HTTPException(400, {
+        message: "Category already exists with the name",
+      });
+    }
+
+    const [category] = await db
+      .insert(categoriesTable)
+      .values({
+        name: body.name,
+      })
+      .returning();
+
+    return ctx.json({ data: category }, 200);
+  })
+  .delete("/:id", validator("param", idParamSchema), async (ctx) => {
+    const param = ctx.req.valid("param");
+
+    const categoryFoundById = await checkRecordExistsById(
+      categoriesTable,
+      param.id
+    );
+    if (!categoryFoundById) {
+      throw new HTTPException(404, { message: "Category not found" });
+    }
+
+    await db.delete(categoriesTable).where(eq(categoriesTable.id, param.id));
+
+    return ctx.json({ success: true }, 200);
+  })
+
   .patch(
     "/:id",
-    async ({ params, body, set }) => {
-      const id = params.id;
-      const { name } = body;
+    validator("param", idParamSchema),
+    validator("json", createCategoryDtoSchema),
+    async (ctx) => {
+      const param = ctx.req.valid("param");
+      const body = ctx.req.valid("json");
 
       const categoryFoundById = await checkRecordExistsById(
         categoriesTable,
-        id
+        param.id
       );
       if (!categoryFoundById) {
-        set.status = "Bad Request";
-        throw new Error("Category not found");
+        throw new HTTPException(404, { message: "Category not found" });
       }
 
       const categoryFoundByName = await checkDuplicateFieldValue(
         categoriesTable,
         categoriesTable.name,
-        name
+        body.name
       );
       if (categoryFoundByName) {
-        set.status = "Bad Request";
-        throw new Error("Category already exists with the name");
+        throw new HTTPException(400, {
+          message: "Category already exists with the name",
+        });
       }
 
       const [category] = await db
         .update(categoriesTable)
         .set({
-          name: name,
+          name: body.name,
         })
-        .where(eq(categoriesTable.id, id))
+        .where(eq(categoriesTable.id, param.id))
         .returning();
 
-      return {
-        success: true,
-        data: category,
-      };
-    },
-    {
-      params: idParamSchema,
-      body: createCategoryDtoSchema,
-      response: {
-        200: successResponseWithDataSchema(categorySchema),
-      },
-    }
-  )
-  .delete(
-    "/:id",
-    async ({ params }) => {
-      await db.delete(categoriesTable).where(eq(categoriesTable.id, params.id));
-
-      return {
-        success: true,
-      };
-    },
-    {
-      params: idParamSchema,
-      response: {
-        200: successResponseWithoutDataSchema,
-      },
+      return ctx.json({ data: category }, 200);
     }
   );

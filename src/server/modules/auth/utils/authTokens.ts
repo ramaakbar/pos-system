@@ -1,9 +1,11 @@
 import { eq } from "drizzle-orm";
-import { Cookie } from "elysia";
+import { Context } from "hono";
+import { deleteCookie, setCookie } from "hono/cookie";
 import { sign, verify } from "jsonwebtoken";
 
 import { clientEnvs } from "@/env/client";
 import { serverEnvs } from "@/env/server";
+import { Env } from "@/server";
 import { db } from "@/server/db";
 import { User, usersTable } from "@/server/db/schema/users";
 
@@ -39,45 +41,26 @@ const cookieOpts = {
   secure: serverEnvs.NODE_ENV === "production",
   domain:
     serverEnvs.NODE_ENV === "production" ? clientEnvs.NEXT_PUBLIC_DOMAIN : "",
-  maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 year
-};
+  maxAge: 34560000, // 1 year
+} as const;
 
 export const accessTokenName = "accessToken";
 export const refreshTokenName = "refreshToken";
 
-export const sendAuthCookies = (
-  cookie: Record<string, Cookie<string | undefined>>,
-  user: User
-) => {
+export const sendAuthCookies = (ctx: Context<Env>, user: User) => {
   const { accessToken, refreshToken } = createAuthTokens(user);
 
-  cookie[accessTokenName].value = accessToken;
-  cookie[accessTokenName].set({
-    ...cookieOpts,
-  });
-
-  cookie[refreshTokenName].value = refreshToken;
-  cookie[refreshTokenName].set({
-    ...cookieOpts,
-  });
+  setCookie(ctx, accessTokenName, accessToken, cookieOpts);
+  setCookie(ctx, refreshTokenName, refreshToken, cookieOpts);
 };
 
-export const clearAuthCookies = (
-  cookie: Record<string, Cookie<string | undefined>>
-) => {
-  cookie[accessTokenName].value = "";
-  cookie[accessTokenName].set({
-    expires: new Date(0),
-  });
-
-  cookie[refreshTokenName].value = "";
-  cookie[refreshTokenName].set({
-    expires: new Date(0),
-  });
+export const clearAuthCookies = (ctx: Context<Env>) => {
+  deleteCookie(ctx, accessTokenName, cookieOpts);
+  deleteCookie(ctx, refreshTokenName, cookieOpts);
 };
 
 export const checkTokens = async (
-  cookie: Record<string, Cookie<string | undefined>>,
+  ctx: Context<Env>,
   accessToken: string,
   refreshToken: string | undefined
 ) => {
@@ -109,7 +92,7 @@ export const checkTokens = async (
     return null;
   }
 
-  sendAuthCookies(cookie, user);
+  sendAuthCookies(ctx, user);
 
   return user;
 };

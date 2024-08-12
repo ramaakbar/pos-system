@@ -1,6 +1,6 @@
-import { treaty } from "@elysiajs/eden";
+import { hc } from "hono/client";
 
 import { getBaseUrl } from "@/lib/utils";
-import { App } from "@/server";
+import { AppType } from "@/server";
 
-export const client = treaty<App>(getBaseUrl());
+export const client = hc<AppType>(getBaseUrl());

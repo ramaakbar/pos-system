@@ -1,14 +1,9 @@
-import { createInsertSchema } from "drizzle-typebox";
-import { t } from "elysia";
+import { z } from "zod";
 
-import { categoriesTable } from "@/server/db/schema/categories";
-
-const insertSchema = createInsertSchema(categoriesTable, {
-  name: t.String({
-    minLength: 1,
-  }),
+export const createCategoryDtoSchema = z.object({
+  name: z.string().min(1),
 });
 
-export const createCategoryDtoSchema = insertSchema;
-
-export const updateCategoryDtoSchema = t.Partial(createCategoryDtoSchema);
+export const updateCategoryDtoSchema = createCategoryDtoSchema.partial({
+  name: true,
+});

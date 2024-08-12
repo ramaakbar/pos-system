@@ -36,14 +36,16 @@ export default function Page() {
   const { data, isLoading } = useQuery({
     queryKey: ["products", query],
     queryFn: async () => {
-      const { data, error } = await client.api.products.index.get({
-        query: query,
+      const res = await client.api.products.$get({
+        query: {
+          search: query.search,
+          category: query.category,
+          page: String(query.page),
+          limit: String(query.limit),
+          sort: query.sort,
+        },
       });
-
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await res.json();
     },
     placeholderData: keepPreviousData,
   });
@@ -51,14 +53,11 @@ export default function Page() {
   const { data: categories, isPending: categoryLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data, error } = await client.api.categories.index.get({
+      const res = await client.api.categories.$get({
         query: {},
       });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await res.json();
     },
     select: (data) => {
       return [
@@ -96,7 +95,7 @@ export default function Page() {
       {!isLoading && data && (
         <DataTable
           columns={columns}
-          data={data?.data!}
+          data={data.data}
           sorting={sortingState}
           onSortingChange={(updateOrValue) => {
             const newSortingState =

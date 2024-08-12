@@ -1,118 +1,96 @@
 import { eq } from "drizzle-orm";
-import { Elysia } from "elysia";
+import { Hono } from "hono";
+import { getCookie } from "hono/cookie";
+import { HTTPException } from "hono/http-exception";
 
+import { Env } from "@/server";
 import { db } from "@/server/db";
-import { userSchema, usersTable } from "@/server/db/schema/users";
-import {
-  successResponseWithDataSchema,
-  successResponseWithoutDataSchema,
-} from "@/server/lib/common-responses";
-import { ctx } from "@/server/plugins/context";
+import { User, usersTable } from "@/server/db/schema/users";
+import { validator } from "@/server/lib/utils";
 
 import { loginDtoSchema, registerDtoSchema } from "./schema";
-import { clearAuthCookies, sendAuthCookies } from "./service";
+import {
+  accessTokenName,
+  checkTokens,
+  clearAuthCookies,
+  refreshTokenName,
+  sendAuthCookies,
+} from "./utils/authTokens";
 
-export const authRoutes = new Elysia({
-  prefix: "/auth",
-  detail: {
-    tags: ["Auth"],
-  },
-})
-  .use(ctx)
-  .post(
-    "/login",
-    async ({ body, cookie, set }) => {
-      const { email, password } = body;
+export const authRoutes = new Hono<Env>()
+  .post("/login", validator("json", loginDtoSchema), async (ctx) => {
+    const body = ctx.req.valid("json");
 
-      const [user] = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.email, email.toLowerCase()));
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, body.email.toLowerCase()));
 
-      if (!user) {
-        set.status = "Bad Request";
-        throw new Error("Email not found");
-      }
+    if (!user) {
+      throw new HTTPException(400, { message: "Email not found" });
+    }
 
-      const validPassword = await Bun.password.verify(password, user.password);
-      if (!validPassword) {
-        set.status = "Bad Request";
-        throw new Error("Invalid Credentials");
-      }
+    const validPassword = await Bun.password.verify(
+      body.password,
+      user.password
+    );
+    if (!validPassword) {
+      throw new HTTPException(400, { message: "Invalid Credentials" });
+    }
 
-      const { password: pass, ...userWithoutPass } = user;
+    const { password, ...userWithoutPass } = user;
+    sendAuthCookies(ctx, userWithoutPass);
 
-      sendAuthCookies(cookie, userWithoutPass);
-
-      return {
-        success: true,
+    return ctx.json(
+      {
         data: userWithoutPass,
-      };
-    },
-    {
-      body: loginDtoSchema,
-      response: {
-        200: successResponseWithDataSchema(userSchema),
       },
-    }
-  )
-  .post(
-    "/register",
-    async ({ body, cookie, set }) => {
-      const { email, password } = body;
-
-      const [foundUser] = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.email, email.toLowerCase()));
-
-      if (foundUser) {
-        set.status = "Bad Request";
-        throw new Error("Email already used");
-      }
-
-      const passwordHash = await Bun.password.hash(password);
-
-      const [{ password: omitPassword, ...user }] = await db
-        .insert(usersTable)
-        .values({
-          email,
-          password: passwordHash,
-          role: "Member",
-        })
-        .returning();
-
-      sendAuthCookies(cookie, user);
-
-      return {
-        success: true,
-      };
-    },
-    {
-      body: registerDtoSchema,
-      response: {
-        200: successResponseWithoutDataSchema,
-      },
-    }
-  )
-  .post(
-    "/logout",
-    async ({ cookie }) => {
-      clearAuthCookies(cookie);
-
-      return {
-        success: true,
-      };
-    },
-    {
-      response: {
-        200: successResponseWithoutDataSchema,
-      },
-    }
-  )
-  .guard({
-    isAuth: false,
+      200
+    );
   })
-  .get("/me", ({ user }) => {
-    return { user };
+  .post("/register", validator("json", registerDtoSchema), async (ctx) => {
+    const body = ctx.req.valid("json");
+
+    const [foundUser] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, body.email.toLowerCase()));
+
+    if (foundUser) {
+      throw new HTTPException(400, { message: "Email already used" });
+    }
+    const passwordHash = await Bun.password.hash(body.password);
+
+    const [{ password: omitPassword, ...user }] = await db
+      .insert(usersTable)
+      .values({
+        email: body.email,
+        password: passwordHash,
+        role: "Member",
+      })
+      .returning();
+
+    sendAuthCookies(ctx, user);
+
+    return ctx.json(
+      {
+        data: user,
+      },
+      200
+    );
+  })
+  .post("/logout", (ctx) => {
+    clearAuthCookies(ctx);
+
+    return ctx.json({}, 200);
+  })
+  .get("/me", async (ctx) => {
+    const accessToken = getCookie(ctx, accessTokenName);
+    const refreshToken = getCookie(ctx, refreshTokenName);
+
+    let user: User | null | undefined = null;
+
+    user = await checkTokens(ctx, accessToken!, refreshToken);
+
+    return ctx.json({ user }, 200);
   });

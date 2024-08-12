@@ -5,9 +5,9 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-typebox";
-import { t, UnwrapSchema } from "elysia";
+import { createSelectSchema } from "drizzle-zod";
 import { ulid } from "ulid";
+import { z } from "zod";
 
 import { generateCode } from "@/server/lib/utils";
 
@@ -71,27 +71,27 @@ export const detailTransactionsTable = pgTable("detailTransactions", {
   updatedAt: timestamp("modified_at").defaultNow().notNull(),
 });
 
-export const transactionDetailSchema = t.Object({
-  ...createSelectSchema(detailTransactionsTable).properties,
-  product: t.Object({ ...productSchema.properties }),
+export const transactionDetailSchema = z.object({
+  ...createSelectSchema(detailTransactionsTable).shape,
+  product: z.object({ ...productSchema.shape }),
 });
 
-export type TransactionDetail = UnwrapSchema<typeof transactionDetailSchema>;
+export type TransactionDetail = z.infer<typeof transactionDetailSchema>;
 
-export const transactionHeaderSchema = t.Object({
-  ...createSelectSchema(headerTransactionsTable).properties,
-  customer: t.Union([customerSchema, t.Null()]),
+export const transactionHeaderSchema = z.object({
+  ...createSelectSchema(headerTransactionsTable).shape,
+  customer: z.union([customerSchema, z.null()]),
 });
 
-export type TransactionHeader = UnwrapSchema<typeof transactionHeaderSchema>;
+export type TransactionHeader = z.infer<typeof transactionHeaderSchema>;
 
-export const transactionSchema = t.Object({
-  ...transactionHeaderSchema.properties,
-  detail: t.Array(
-    t.Object({
-      ...transactionDetailSchema.properties,
+export const transactionSchema = z.object({
+  ...transactionHeaderSchema.shape,
+  detail: z.array(
+    z.object({
+      ...transactionDetailSchema.shape,
     })
   ),
 });
 
-export type Transaction = UnwrapSchema<typeof transactionSchema>;
+export type Transaction = z.infer<typeof transactionSchema>;

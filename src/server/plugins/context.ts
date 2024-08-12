@@ -4,7 +4,7 @@ import {
   accessTokenName,
   checkTokens,
   refreshTokenName,
-} from "../modules/auth/service";
+} from "../modules/auth/utils/authTokens";
 
 export const ctx = new Elysia()
   .derive({ as: "global" }, async ({ cookie, request }) => {

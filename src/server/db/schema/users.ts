@@ -5,9 +5,9 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-typebox";
-import { t, UnwrapSchema } from "elysia";
+import { createSelectSchema } from "drizzle-zod";
 import { ulid } from "ulid";
+import { z } from "zod";
 
 export const usersTable = pgTable("users", {
   id: varchar("id", { length: 255 })
@@ -25,8 +25,8 @@ export const usersTable = pgTable("users", {
   updatedAt: timestamp("modified_at").defaultNow().notNull(),
 });
 
-const userSchemaTemp = createSelectSchema(usersTable);
+export const userSchema = createSelectSchema(usersTable).omit({
+  password: true,
+});
 
-export const userSchema = t.Omit(userSchemaTemp, ["password"]);
-
-export type User = UnwrapSchema<typeof userSchema>;
+export type User = z.infer<typeof userSchema>;

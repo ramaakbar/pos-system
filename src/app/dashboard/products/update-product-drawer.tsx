@@ -1,12 +1,13 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { DefaultError, useMutation, useQuery } from "@tanstack/react-query";
-import { UnwrapSchema } from "elysia";
+import { InferRequestType } from "hono";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,8 +45,8 @@ export const UpdateProductDrawer = ({
   setIsOpen,
   className,
 }: Props) => {
-  const form = useForm<UnwrapSchema<typeof updateProductDtoSchema>>({
-    resolver: typeboxResolver(updateProductDtoSchema),
+  const form = useForm<z.infer<typeof updateProductDtoSchema>>({
+    resolver: zodResolver(updateProductDtoSchema),
     defaultValues: {
       name: product.name,
       categoryId: product.categoryId,
@@ -59,19 +60,16 @@ export const UpdateProductDrawer = ({
   const { mutate, isPending } = useMutation<
     unknown,
     DefaultError,
-    UnwrapSchema<typeof updateProductDtoSchema>
+    InferRequestType<(typeof client.api.products)[":id"]["$patch"]>["form"]
   >({
-    mutationKey: ["products"],
     mutationFn: async (values) => {
-      const { data, error } = await client.api
-        .products({
+      const res = await client.api.products[":id"].$patch({
+        param: {
           id: product.id,
-        })
-        .patch(values);
-      if (error) {
-        throw error.value;
-      }
-      return data;
+        },
+        form: values,
+      });
+      return await res.json();
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({
@@ -90,14 +88,11 @@ export const UpdateProductDrawer = ({
   } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data, error } = await client.api.categories.index.get({
+      const res = await client.api.categories.$get({
         query: {},
       });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await res.json();
     },
     enabled: false,
   });
@@ -112,7 +107,15 @@ export const UpdateProductDrawer = ({
           <div className="p-4 pb-0">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit((values) => mutate(values))}
+                onSubmit={form.handleSubmit((values) =>
+                  mutate({
+                    name: values.name,
+                    categoryId: values.categoryId,
+                    price: String(values.price),
+                    quantity: String(values.quantity),
+                    media: values.media,
+                  })
+                )}
                 className="space-y-4"
               >
                 <FormField

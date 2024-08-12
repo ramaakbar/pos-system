@@ -1,24 +1,24 @@
-import { t } from "elysia";
+import { z } from "zod";
 
-export const registerDtoSchema = t.Object({
-  email: t.String({
-    format: "email",
-    error: "Invalid email",
+export const registerDtoSchema = z.object({
+  email: z.string().email({
+    message: "Invalid email",
   }),
-  password: t.String({
-    minLength: 8,
-    maxLength: 64,
-    error: "Password length must be between 8 and 64 characters",
-  }),
+  password: z
+    .string()
+    .min(8, {
+      message: "Password must be greater than 8 chars",
+    })
+    .max(64, {
+      message: "Password must be less then 64 chars",
+    }),
 });
 
-export const loginDtoSchema = t.Object({
-  email: t.String({
-    format: "email",
-    error: "Invalid email",
+export const loginDtoSchema = z.object({
+  email: z.string().email({
+    message: "Invalid email",
   }),
-  password: t.String({
-    minLength: 1,
-    error: "Password can not be empty",
+  password: z.string().min(1, {
+    message: "Password can not be empty",
   }),
 });

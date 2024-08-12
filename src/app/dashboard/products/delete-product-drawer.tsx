@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { DefaultError, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,17 +23,14 @@ type Props = {
 };
 
 export const DeleteProductDrawer = ({ product, isOpen, setIsOpen }: Props) => {
-  const { mutate, isPending } = useMutation<unknown, DefaultError>({
-    mutationKey: ["products", product.id],
+  const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      const { data, error } = await client.api
-        .products({ id: product.id })
-        .delete();
-
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      const res = await client.api.products[":id"].$delete({
+        param: {
+          id: product.id,
+        },
+      });
+      return await res.json();
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({

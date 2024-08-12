@@ -5,9 +5,9 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-typebox";
-import { t, UnwrapSchema } from "elysia";
+import { createSelectSchema } from "drizzle-zod";
 import { ulid } from "ulid";
+import { z } from "zod";
 
 import { generateCode } from "@/server/lib/utils";
 
@@ -33,13 +33,9 @@ export const productsTable = pgTable("products", {
   updatedAt: timestamp("modified_at").defaultNow().notNull(),
 });
 
-export const productSchema = t.Object({
-  ...createSelectSchema(productsTable).properties,
+export const productSchema = z.object({
+  ...createSelectSchema(productsTable).shape,
   category: categorySchema,
 });
 
-export const returningProductSchema = t.Object({
-  ...createSelectSchema(productsTable).properties,
-});
-
-export type Product = UnwrapSchema<typeof productSchema>;
+export type Product = z.infer<typeof productSchema>;

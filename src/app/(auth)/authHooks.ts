@@ -14,12 +14,9 @@ export const useGetCurrentUserQuery = () => {
   return useQuery({
     queryKey: ["current-user"],
     queryFn: async () => {
-      const { data, error } = await client.api.auth.me.get();
+      const res = await client.api.auth.me.$get();
 
-      if (error) {
-        return null;
-      }
-      return data.user;
+      return await res.json();
     },
   });
 };

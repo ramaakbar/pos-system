@@ -1,7 +1,7 @@
 import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-typebox";
-import { UnwrapSchema } from "elysia";
+import { createSelectSchema } from "drizzle-zod";
 import { ulid } from "ulid";
+import { z } from "zod";
 
 import { generateCode } from "@/server/lib/utils";
 
@@ -27,4 +27,4 @@ export const customersTable = pgTable("customers", {
 
 export const customerSchema = createSelectSchema(customersTable);
 
-export type Customer = UnwrapSchema<typeof customerSchema>;
+export type Customer = z.infer<typeof customerSchema>;

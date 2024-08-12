@@ -1,20 +1,14 @@
-import { t } from "elysia";
+import { z } from "zod";
 
-export const idParamSchema = t.Object({
-  id: t.String({
-    error: "Invalid id param",
-  }),
+export const idParamSchema = z.object({
+  id: z.string(),
 });
 
-export const paginationQuerySchema = t.Partial(
-  t.Object({
-    search: t.String(),
-    sort: t.String(),
-    page: t.Number({
-      minimum: 0,
-    }),
-    limit: t.Number({
-      minimum: 0,
-    }),
-  })
-);
+export const paginationQuerySchema = z.object({
+  search: z.string().optional(),
+  sort: z.string().default("createdAt.asc"),
+  page: z.coerce.number().default(1),
+  limit: z.coerce.number().default(10),
+});
+
+type test = z.infer<typeof paginationQuerySchema>;

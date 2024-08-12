@@ -9,24 +9,18 @@ import {
   ilike,
   SQL,
 } from "drizzle-orm";
-import Elysia from "elysia";
+import { Hono } from "hono";
+import { every } from "hono/combine";
+import { HTTPException } from "hono/http-exception";
 
+import { Env } from "@/server";
 import { db } from "@/server/db";
 import { categoriesTable } from "@/server/db/schema/categories";
-import {
-  Product,
-  productSchema,
-  productsTable,
-  returningProductSchema,
-} from "@/server/db/schema/products";
-import {
-  successResponseWithDataSchema,
-  successResponseWithoutDataSchema,
-  successResponseWithPaginationSchema,
-} from "@/server/lib/common-responses";
+import { Product, productsTable } from "@/server/db/schema/products";
 import { idParamSchema } from "@/server/lib/common-schemas";
 import { disk } from "@/server/lib/flydrive";
-import { ctx } from "@/server/plugins/context";
+import { validator } from "@/server/lib/utils";
+import { adminGuard, authGuard } from "@/server/middlewares/auth";
 
 import {
   createProductDtoSchema,
@@ -34,49 +28,36 @@ import {
   updateProductDtoSchema,
 } from "./schema";
 
-export const productsRoutes = new Elysia({
-  prefix: "/products",
-  detail: {
-    tags: ["Product"],
-  },
-})
-  .use(ctx)
-  .get(
-    "/",
-    async ({ query, set }) => {
-      const {
-        search,
-        sort = "createdAt.asc",
-        page = 1,
-        limit = 20,
-        category,
-      } = query;
+export const productRoutes = new Hono<Env>()
+  .get("/", validator("query", getProductQuerySchema), async (ctx) => {
+    const { search, sort, page, limit, category } = ctx.req.valid("query");
 
-      const [sortBy, sortOrder] = (sort?.split(".").filter(Boolean) ?? [
-        "createdAt",
-        "desc",
-      ]) as [keyof Omit<Product, "category">, "asc" | "desc"];
+    const [sortBy, sortOrder] = sort.split(".").filter(Boolean) as [
+      keyof Omit<Product, "category">,
+      "asc" | "desc",
+    ];
 
-      const filter: Array<SQL> = [];
+    const filter: Array<SQL> = [];
 
-      if (search) filter.push(ilike(productsTable.name, `%${search}%`));
-      if (category) filter.push(ilike(categoriesTable.name, `%${category}%`));
+    if (search) filter.push(ilike(productsTable.name, `%${search}%`));
+    if (category) filter.push(ilike(categoriesTable.name, `%${category}%`));
 
-      const where = filter.length > 0 ? and(...filter) : undefined;
+    const where = filter.length > 0 ? and(...filter) : undefined;
 
-      const [{ total }] = await db
-        .select({ total: count() })
-        .from(productsTable)
-        .innerJoin(
-          categoriesTable,
-          eq(productsTable.categoryId, categoriesTable.id)
-        )
-        .where(where);
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(productsTable)
+      .innerJoin(
+        categoriesTable,
+        eq(productsTable.categoryId, categoriesTable.id)
+      )
+      .where(where);
 
-      const pageCount = Math.ceil(total / Number(limit));
+    const pageCount = Math.ceil(total / Number(limit));
 
-      if (total === 0) {
-        return {
+    if (total === 0 || page === 0 || page > pageCount) {
+      return ctx.json(
+        {
           success: true,
           pagination: {
             total: total,
@@ -87,47 +68,45 @@ export const productsRoutes = new Elysia({
             to: 0,
           },
           data: [],
-        };
-      }
+        },
+        200
+      );
+    }
 
-      if (page === 0 || page > pageCount) {
-        set.status = "Bad Request";
-        throw new Error("Invalid page");
-      }
+    const products = await db
+      .select({
+        id: productsTable.id,
+        code: productsTable.code,
+        categoryId: productsTable.categoryId,
+        name: productsTable.name,
+        description: productsTable.description,
+        media: productsTable.media,
+        price: productsTable.price,
+        quantity: productsTable.quantity,
+        category: getTableColumns(categoriesTable),
+        createdAt: productsTable.createdAt,
+        updatedAt: productsTable.updatedAt,
+      })
+      .from(productsTable)
+      .innerJoin(
+        categoriesTable,
+        eq(productsTable.categoryId, categoriesTable.id)
+      )
+      .where(where)
+      .limit(limit)
+      .offset(limit * (page - 1))
+      .orderBy(
+        sortOrder.toUpperCase() === "DESC"
+          ? desc(productsTable[sortBy])
+          : asc(productsTable[sortBy])
+      );
 
-      const products = await db
-        .select({
-          id: productsTable.id,
-          code: productsTable.code,
-          categoryId: productsTable.categoryId,
-          name: productsTable.name,
-          description: productsTable.description,
-          media: productsTable.media,
-          price: productsTable.price,
-          quantity: productsTable.quantity,
-          category: getTableColumns(categoriesTable),
-          createdAt: productsTable.createdAt,
-          updatedAt: productsTable.updatedAt,
-        })
-        .from(productsTable)
-        .innerJoin(
-          categoriesTable,
-          eq(productsTable.categoryId, categoriesTable.id)
-        )
-        .where(where)
-        .limit(limit)
-        .offset(limit * (page - 1))
-        .orderBy(
-          sortOrder.toUpperCase() === "DESC"
-            ? desc(productsTable[sortBy])
-            : asc(productsTable[sortBy])
-        );
+    for (const product of products) {
+      product.media = await disk.getUrl(product.media);
+    }
 
-      for (const product of products) {
-        product.media = await disk.getUrl(product.media);
-      }
-
-      return {
+    return ctx.json(
+      {
         success: true,
         pagination: {
           total: total,
@@ -138,139 +117,116 @@ export const productsRoutes = new Elysia({
           to: (page - 1) * limit + products.length,
         },
         data: products,
-      };
-    },
-    {
-      query: getProductQuerySchema,
-      response: {
-        200: successResponseWithPaginationSchema(productSchema),
       },
-    }
-  )
-  .get(
-    "/:id",
-    async ({ params, set }) => {
-      const id = params.id;
-
-      const [product] = await db
-        .select({
-          id: productsTable.id,
-          code: productsTable.code,
-          categoryId: productsTable.categoryId,
-          name: productsTable.name,
-          description: productsTable.description,
-          media: productsTable.media,
-          price: productsTable.price,
-          quantity: productsTable.quantity,
-          category: categoriesTable,
-          createdAt: productsTable.createdAt,
-          updatedAt: productsTable.updatedAt,
-        })
-        .from(productsTable)
-        .innerJoin(
-          categoriesTable,
-          eq(productsTable.categoryId, categoriesTable.id)
-        )
-        .where(eq(productsTable.id, id));
-
-      if (!product) {
-        set.status = "Bad Request";
-        throw new Error("Product not found");
-      }
-
-      product.media = await disk.getUrl(product.media);
-
-      return {
-        success: true,
-        data: product,
-      };
-    },
-    {
-      params: idParamSchema,
-      response: {
-        200: successResponseWithDataSchema(productSchema),
-      },
-    }
-  )
-  .guard({
-    isAuth: true,
-    isAdmin: true,
+      200
+    );
   })
-  .post(
-    "/",
-    async ({ body, set }) => {
-      const { name, categoryId, price, quantity, description, media } = body;
+  .get("/:id", validator("param", idParamSchema), async (ctx) => {
+    const param = ctx.req.valid("param");
 
-      const [productFound] = await db
-        .select()
-        .from(productsTable)
-        .where(eq(productsTable.name, name));
+    const [product] = await db
+      .select({
+        id: productsTable.id,
+        code: productsTable.code,
+        categoryId: productsTable.categoryId,
+        name: productsTable.name,
+        description: productsTable.description,
+        media: productsTable.media,
+        price: productsTable.price,
+        quantity: productsTable.quantity,
+        category: categoriesTable,
+        createdAt: productsTable.createdAt,
+        updatedAt: productsTable.updatedAt,
+      })
+      .from(productsTable)
+      .innerJoin(
+        categoriesTable,
+        eq(productsTable.categoryId, categoriesTable.id)
+      )
+      .where(eq(productsTable.id, param.id));
 
-      if (productFound) {
-        set.status = "Bad Request";
-        throw new Error("Product already exists with the name");
-      }
-
-      let saveImage = "";
-
-      if (media instanceof File) {
-        saveImage = `${randomUUID()}.${media?.name.split(".")[1]}`;
-
-        await disk.put(
-          saveImage,
-          await Bun.readableStreamToBytes(media.stream())
-        );
-      }
-
-      const [product] = await db
-        .insert(productsTable)
-        .values({
-          name,
-          categoryId,
-          price,
-          quantity,
-          description,
-          media: saveImage,
-        })
-        .returning({
-          id: productsTable.id,
-          code: productsTable.code,
-          categoryId: productsTable.categoryId,
-          name: productsTable.name,
-          description: productsTable.description,
-          media: productsTable.media,
-          price: productsTable.price,
-          quantity: productsTable.quantity,
-          createdAt: productsTable.createdAt,
-          updatedAt: productsTable.updatedAt,
-        });
-
-      return {
-        success: true,
-        data: product,
-      };
-    },
-    {
-      body: createProductDtoSchema,
-      response: {
-        200: successResponseWithDataSchema(returningProductSchema),
-      },
+    if (!product) {
+      throw new HTTPException(404, { message: "Product not found" });
     }
-  )
+
+    product.media = await disk.getUrl(product.media);
+
+    return ctx.json({
+      success: true,
+      data: product,
+    });
+  })
+  .use(every(authGuard, adminGuard))
+  .post("/", validator("form", createProductDtoSchema), async (ctx) => {
+    const { name, categoryId, price, quantity, description, media } =
+      ctx.req.valid("form");
+
+    const [productFound] = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.name, name));
+
+    if (productFound) {
+      throw new HTTPException(400, {
+        message: "Product name is already used",
+      });
+    }
+
+    let saveImage = "";
+
+    if (media instanceof File) {
+      saveImage = `${randomUUID()}.${media?.name.split(".")[1]}`;
+
+      await disk.put(
+        saveImage,
+        await Bun.readableStreamToBytes(media.stream())
+      );
+    }
+
+    const [product] = await db
+      .insert(productsTable)
+      .values({
+        name,
+        categoryId,
+        price,
+        quantity,
+        description,
+        media: saveImage,
+      })
+      .returning({
+        id: productsTable.id,
+        code: productsTable.code,
+        categoryId: productsTable.categoryId,
+        name: productsTable.name,
+        description: productsTable.description,
+        media: productsTable.media,
+        price: productsTable.price,
+        quantity: productsTable.quantity,
+        createdAt: productsTable.createdAt,
+        updatedAt: productsTable.updatedAt,
+      });
+
+    return ctx.json({
+      success: true,
+      data: product,
+    });
+  })
   .patch(
     "/:id",
-    async ({ params, body, set, user }) => {
-      const id = params.id;
-      const { name, categoryId, price, quantity, description, media } = body;
+    validator("param", idParamSchema),
+    validator("form", updateProductDtoSchema),
+    async (ctx) => {
+      const param = ctx.req.valid("param");
+      const { name, categoryId, price, quantity, description, media } =
+        ctx.req.valid("form");
 
       const [productFound] = await db
         .select()
         .from(productsTable)
-        .where(eq(productsTable.id, id));
+        .where(eq(productsTable.id, param.id));
 
       if (!productFound) {
-        set.status = "Bad Request";
-        throw new Error("Product not found");
+        throw new HTTPException(404, { message: "Product not found" });
       }
 
       let saveImage = productFound.media;
@@ -295,7 +251,7 @@ export const productsRoutes = new Elysia({
           description,
           media: saveImage,
         })
-        .where(eq(productsTable.id, id))
+        .where(eq(productsTable.id, param.id))
         .returning({
           id: productsTable.id,
           code: productsTable.code,
@@ -309,30 +265,35 @@ export const productsRoutes = new Elysia({
           updatedAt: productsTable.updatedAt,
         });
 
-      return {
-        success: true,
+      return ctx.json({
+        sucess: true,
         data: product,
-      };
-    },
-    {
-      params: idParamSchema,
-      body: updateProductDtoSchema,
-      response: {
-        200: successResponseWithDataSchema(returningProductSchema),
-      },
+      });
     }
-  ) //TEMP routing for update stock
+  )
   .patch(
     "/stock/:id",
-    async ({ params, body, set, user }) => {
-      const { quantity } = body;
+    validator("param", idParamSchema),
+    validator("form", updateProductDtoSchema),
+    async (ctx) => {
+      const param = ctx.req.valid("param");
+      const { quantity } = ctx.req.valid("form");
+
+      const [productFound] = await db
+        .select()
+        .from(productsTable)
+        .where(eq(productsTable.id, param.id));
+
+      if (!productFound) {
+        throw new HTTPException(404, { message: "Product not found" });
+      }
 
       const [product] = await db
         .update(productsTable)
         .set({
           quantity,
         })
-        .where(eq(productsTable.id, params.id))
+        .where(eq(productsTable.id, param.id))
         .returning({
           id: productsTable.id,
           code: productsTable.code,
@@ -346,40 +307,35 @@ export const productsRoutes = new Elysia({
           updatedAt: productsTable.updatedAt,
         });
 
-      return {
+      return ctx.json({
         success: true,
         data: product,
-      };
-    },
-    {
-      params: idParamSchema,
-      body: updateProductDtoSchema,
-      response: {
-        200: successResponseWithDataSchema(returningProductSchema),
-      },
+      });
     }
   )
-  .delete(
-    "/:id",
-    async ({ params }) => {
-      const [product] = await db
-        .delete(productsTable)
-        .where(eq(productsTable.id, params.id))
-        .returning({
-          id: productsTable.id,
-          media: productsTable.media,
-        });
+  .delete("/:id", validator("param", idParamSchema), async (ctx) => {
+    const param = ctx.req.valid("param");
 
-      await disk.delete(product.media);
+    const [productFound] = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.id, param.id));
 
-      return {
-        success: true,
-      };
-    },
-    {
-      params: idParamSchema,
-      response: {
-        200: successResponseWithoutDataSchema,
-      },
+    if (!productFound) {
+      throw new HTTPException(404, { message: "Product not found" });
     }
-  );
+
+    const [product] = await db
+      .delete(productsTable)
+      .where(eq(productsTable.id, param.id))
+      .returning({
+        id: productsTable.id,
+        media: productsTable.media,
+      });
+
+    await disk.delete(product.media);
+
+    return ctx.json({
+      success: true,
+    });
+  });
