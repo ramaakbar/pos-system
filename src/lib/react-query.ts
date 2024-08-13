@@ -5,16 +5,21 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      refetchOnMount: false,
     },
   },
-  mutationCache: new MutationCache({
-    onError: (err) => {
-      toast.error(`Error : ${err.message}`);
+  queryCache: new QueryCache({
+    onError: (error) => {
+      toast.error(
+        `An error occurred: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     },
   }),
-  queryCache: new QueryCache({
-    onError: (error, query) => {
-      toast.error(`Something went wrong: ${error.message}`);
+  mutationCache: new MutationCache({
+    onError: (error) => {
+      toast.error(
+        `An error occurred: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     },
   }),
 });

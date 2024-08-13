@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { DefaultError, useMutation } from "@tanstack/react-query";
-import { UnwrapSchema } from "elysia";
+import { InferRequestType } from "hono";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
-import { cn } from "@/lib/utils";
+import { cn, handleResponse } from "@/lib/utils";
 import { createCategoryDtoSchema } from "@/server/modules/categories/schema";
 
 type Props = {
@@ -37,8 +38,8 @@ type Props = {
 export const CreateCategoryDrawer = ({ className }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const form = useForm<UnwrapSchema<typeof createCategoryDtoSchema>>({
-    resolver: typeboxResolver(createCategoryDtoSchema),
+  const form = useForm<z.infer<typeof createCategoryDtoSchema>>({
+    resolver: zodResolver(createCategoryDtoSchema),
     defaultValues: {
       name: "",
     },
@@ -48,15 +49,14 @@ export const CreateCategoryDrawer = ({ className }: Props) => {
   const { mutate, isPending } = useMutation<
     unknown,
     DefaultError,
-    UnwrapSchema<typeof createCategoryDtoSchema>
+    InferRequestType<(typeof client.api.categories)["$post"]>["json"]
   >({
-    mutationKey: ["categories"],
     mutationFn: async (values) => {
-      const { data, error } = await client.api.categories.index.post(values);
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      const res = await client.api.categories.$post({
+        json: values,
+      });
+
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({

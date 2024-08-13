@@ -1,7 +1,6 @@
-import { createInsertSchema } from "drizzle-typebox";
-import { t } from "elysia";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
 
-import { LiteralUnion } from "@/lib/utils";
 import {
   detailTransactionsTable,
   headerTransactionsTable,
@@ -11,36 +10,30 @@ import {
 
 const insertTransactionHeaderSchema = createInsertSchema(
   headerTransactionsTable
-);
+).omit({
+  amount: true,
+});
 
 const insertTransactionDetailSchema = createInsertSchema(
   detailTransactionsTable
-);
-
-export const createTransactionDtoSchema = t.Object({
-  ...t.Omit(insertTransactionHeaderSchema, [
-    "createdAt",
-    "updatedAt",
-    "amount",
-    "customerId",
-  ]).properties,
-  customer: t.Optional(t.String()),
-  address: t.Optional(t.String()),
-  detail: t.Array(
-    t.Omit(insertTransactionDetailSchema, [
-      "createdAt",
-      "updatedAt",
-      "transactionId",
-    ])
-  ),
+).omit({
+  transactionId: true,
 });
 
-export const createTransactionHeaderDtoSchema = t.Omit(
-  createTransactionDtoSchema,
-  ["detail"]
+export const createTransactionDtoSchema = z.object({
+  ...insertTransactionHeaderSchema.shape,
+  customer: z.string().optional(),
+  address: z.string().optional(),
+  detail: z.array(insertTransactionDetailSchema),
+});
+
+export const createTransactionHeaderDtoSchema = createTransactionDtoSchema.omit(
+  {
+    detail: true,
+  }
 );
 
-export const updateTransactionStatusDtoSchema = t.Object({
-  transactionStatus: LiteralUnion(transactionStatusEnum),
-  paymentStatus: LiteralUnion(paymentStatusEnum),
+export const updateTransactionStatusDtoSchema = z.object({
+  transactionStatus: z.enum(transactionStatusEnum),
+  paymentStatus: z.enum(paymentStatusEnum),
 });

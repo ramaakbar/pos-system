@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/drawer";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
+import { handleResponse } from "@/lib/utils";
 import { Product } from "@/server/db/schema/products";
 
 type Props = {
@@ -30,7 +31,7 @@ export const DeleteProductDrawer = ({ product, isOpen, setIsOpen }: Props) => {
           id: product.id,
         },
       });
-      return await res.json();
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({

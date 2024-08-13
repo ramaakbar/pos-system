@@ -9,7 +9,7 @@ import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
-import { numberToRupiah } from "@/lib/utils";
+import { handleResponse, numberToRupiah } from "@/lib/utils";
 
 import { PaginatedList } from "../../../components/paginated-list";
 import { useTransactionPageQueryStates } from "./page-query";
@@ -21,17 +21,14 @@ export default function Page() {
   const { data, isFetching } = useQuery({
     queryKey: ["transactions", { page: query.page, search: query.search }],
     queryFn: async () => {
-      const { data, error } = await client.api.transactions.index.get({
+      const res = await client.api.transactions.$get({
         query: {
           search: query.search,
-          page: query.page,
+          page: String(query.page),
         },
       });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await handleResponse(res);
     },
   });
 

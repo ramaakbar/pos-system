@@ -1,7 +1,7 @@
 import type { ClassValue } from "clsx";
-import { TLiteral, TUnion, Type } from "@sinclair/typebox";
 import { SortingState } from "@tanstack/react-table";
 import { clsx } from "clsx";
+import { ClientResponse } from "hono/client";
 import { twMerge } from "tailwind-merge";
 
 import { clientEnvs } from "../env/client";
@@ -27,18 +27,18 @@ export const numberToRupiah = (val: number): string => {
   return formatter.format(val);
 };
 
-export type TLiteralUnion<
-  T extends string[],
-  Acc extends TLiteral[] = [],
-> = T extends [infer L extends string, ...infer R extends string[]]
-  ? TLiteralUnion<R, [...Acc, TLiteral<L>]>
-  : TUnion<Acc>;
-
-export function LiteralUnion<T extends string[]>(
-  values: readonly [...T]
-): TLiteralUnion<T> {
-  return Type.Union(values.map((value) => Type.Literal(value))) as never;
-}
+export const handleResponse = async <
+  T extends Record<string, any>,
+  U extends ClientResponse<T, number, "json">,
+>(
+  response: U
+) => {
+  const data = await response.json();
+  if (!data.success) {
+    throw Error(data.message);
+  }
+  return data as Awaited<ReturnType<Extract<U, { status: 200 }>["json"]>>;
+};
 
 export function formatDate(
   date: Date | string | number,

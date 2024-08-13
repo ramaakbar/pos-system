@@ -6,11 +6,6 @@ import { categoriesTable } from "../schema/categories";
 import { productsTable } from "../schema/products";
 
 function productFactory(ctg: Array<typeof categoriesTable.$inferSelect>) {
-  const date = faker.date.between({
-    from: "2023-01-01T00:00:00.000Z",
-    to: "2024-01-31T00:00:00.000Z",
-  });
-
   const productObj: typeof productsTable.$inferInsert = {
     name: faker.commerce.productName(),
     categoryId: ctg[randomInt(ctg.length)].id,
@@ -18,8 +13,6 @@ function productFactory(ctg: Array<typeof categoriesTable.$inferSelect>) {
     price: parseInt(faker.commerce.price({ min: 1000, max: 20000, dec: 0 })),
     media: "/cookie-sample.jpg",
     quantity: faker.number.int({ min: 0, max: 30 }),
-    createdAt: date,
-    updatedAt: date,
   };
   return productObj;
 }

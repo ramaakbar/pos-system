@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
+import { handleResponse } from "@/lib/utils";
 import { Product } from "@/server/db/schema/products";
 import { updateProductDtoSchema } from "@/server/modules/products/schema";
 
@@ -65,11 +66,12 @@ export const UpdateProductDrawer = ({
     mutationFn: async (values) => {
       const res = await client.api.products[":id"].$patch({
         param: {
-          id: product.id,
+          id: "adasd",
         },
         form: values,
       });
-      return await res.json();
+
+      await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({
@@ -92,7 +94,7 @@ export const UpdateProductDrawer = ({
         query: {},
       });
 
-      return await res.json();
+      return await handleResponse(res);
     },
     enabled: false,
   });
@@ -113,7 +115,7 @@ export const UpdateProductDrawer = ({
                     categoryId: values.categoryId,
                     price: String(values.price),
                     quantity: String(values.quantity),
-                    media: values.media,
+                    ...(values.media && { media: values.media }),
                   })
                 )}
                 className="space-y-4"

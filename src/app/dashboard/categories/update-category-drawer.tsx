@@ -1,12 +1,13 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { DefaultError, useMutation } from "@tanstack/react-query";
-import { UnwrapSchema } from "elysia";
+import { InferRequestType } from "hono";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
+import { handleResponse } from "@/lib/utils";
 import { Category } from "@/server/db/schema/categories";
 import { createCategoryDtoSchema } from "@/server/modules/categories/schema";
 
@@ -42,8 +44,8 @@ export const UpdateCategoryDrawer = ({
   setIsOpen,
   className,
 }: Props) => {
-  const form = useForm<UnwrapSchema<typeof createCategoryDtoSchema>>({
-    resolver: typeboxResolver(createCategoryDtoSchema),
+  const form = useForm<z.infer<typeof createCategoryDtoSchema>>({
+    resolver: zodResolver(createCategoryDtoSchema),
     defaultValues: {
       name: category.name,
     },
@@ -53,19 +55,17 @@ export const UpdateCategoryDrawer = ({
   const { mutate, isPending } = useMutation<
     unknown,
     DefaultError,
-    UnwrapSchema<typeof createCategoryDtoSchema>
+    InferRequestType<(typeof client.api.categories)[":id"]["$patch"]>["json"]
   >({
-    mutationKey: ["categories"],
     mutationFn: async (values) => {
-      const { data, error } = await client.api
-        .categories({
+      const res = await client.api.categories[":id"].$patch({
+        param: {
           id: category.id,
-        })
-        .patch(values);
-      if (error) {
-        throw error.value;
-      }
-      return data;
+        },
+        json: values,
+      });
+
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({

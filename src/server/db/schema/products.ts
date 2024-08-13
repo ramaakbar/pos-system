@@ -29,8 +29,16 @@ export const productsTable = pgTable("products", {
   media: varchar("media", { length: 255 }).notNull(),
   price: integer("price").notNull(),
   quantity: integer("quantity").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("modified_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", {
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("modified_at", {
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
 });
 
 export const productSchema = z.object({
@@ -39,3 +47,4 @@ export const productSchema = z.object({
 });
 
 export type Product = z.infer<typeof productSchema>;
+export type tesasd = typeof productsTable.$inferSelect;

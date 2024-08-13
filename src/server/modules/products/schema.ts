@@ -14,7 +14,9 @@ export const createProductDtoSchema = z.object({
     message: "Quantity must be greater than 0",
   }),
   media: z
-    .instanceof(File)
+    .instanceof(File, {
+      message: "Media is required",
+    })
     .refine((file) => {
       return !file || file.size <= MAX_UPLOAD_SIZE;
     }, "File size must be less than 3MB")

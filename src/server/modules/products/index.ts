@@ -151,10 +151,13 @@ export const productRoutes = new Hono<Env>()
 
     product.media = await disk.getUrl(product.media);
 
-    return ctx.json({
-      success: true,
-      data: product,
-    });
+    return ctx.json(
+      {
+        success: true,
+        data: product,
+      },
+      200
+    );
   })
   .use(every(authGuard, adminGuard))
   .post("/", validator("form", createProductDtoSchema), async (ctx) => {
@@ -206,10 +209,13 @@ export const productRoutes = new Hono<Env>()
         updatedAt: productsTable.updatedAt,
       });
 
-    return ctx.json({
-      success: true,
-      data: product,
-    });
+    return ctx.json(
+      {
+        success: true,
+        data: product,
+      },
+      200
+    );
   })
   .patch(
     "/:id",
@@ -265,10 +271,13 @@ export const productRoutes = new Hono<Env>()
           updatedAt: productsTable.updatedAt,
         });
 
-      return ctx.json({
-        sucess: true,
-        data: product,
-      });
+      return ctx.json(
+        {
+          success: true,
+          data: product,
+        },
+        200
+      );
     }
   )
   .patch(
@@ -307,10 +316,13 @@ export const productRoutes = new Hono<Env>()
           updatedAt: productsTable.updatedAt,
         });
 
-      return ctx.json({
-        success: true,
-        data: product,
-      });
+      return ctx.json(
+        {
+          success: true,
+          data: product,
+        },
+        200
+      );
     }
   )
   .delete("/:id", validator("param", idParamSchema), async (ctx) => {
@@ -335,7 +347,10 @@ export const productRoutes = new Hono<Env>()
 
     await disk.delete(product.media);
 
-    return ctx.json({
-      success: true,
-    });
+    return ctx.json(
+      {
+        success: true,
+      },
+      200
+    );
   });

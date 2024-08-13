@@ -1,9 +1,9 @@
 "use client";
 
-import { typeboxResolver } from "@hookform/resolvers/typebox";
-import { UnwrapSchema } from "elysia";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,8 +20,8 @@ import { loginDtoSchema } from "@/server/modules/auth/schema";
 import { useLoginMutation } from "../authHooks";
 
 export const LoginForm = () => {
-  const form = useForm<UnwrapSchema<typeof loginDtoSchema>>({
-    resolver: typeboxResolver(loginDtoSchema),
+  const form = useForm<z.infer<typeof loginDtoSchema>>({
+    resolver: zodResolver(loginDtoSchema),
     defaultValues: {
       email: "",
       password: "",

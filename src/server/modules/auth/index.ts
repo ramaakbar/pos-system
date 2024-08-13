@@ -43,6 +43,7 @@ export const authRoutes = new Hono<Env>()
 
     return ctx.json(
       {
+        success: true,
         data: userWithoutPass,
       },
       200
@@ -74,6 +75,7 @@ export const authRoutes = new Hono<Env>()
 
     return ctx.json(
       {
+        success: true,
         data: user,
       },
       200
@@ -92,5 +94,5 @@ export const authRoutes = new Hono<Env>()
 
     user = await checkTokens(ctx, accessToken!, refreshToken);
 
-    return ctx.json({ user }, 200);
+    return ctx.json({ success: true, user }, 200);
   });

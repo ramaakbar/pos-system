@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
-import { cn } from "@/lib/utils";
+import { cn, handleResponse } from "@/lib/utils";
 import { createProductDtoSchema } from "@/server/modules/products/schema";
 
 type Props = {
@@ -60,7 +60,8 @@ export const CreateProductDrawer = ({ className }: Props) => {
       const res = await client.api.products.$post({
         form: values,
       });
-      return await res.json();
+
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({
@@ -83,7 +84,7 @@ export const CreateProductDrawer = ({ className }: Props) => {
         query: {},
       });
 
-      return await res.json();
+      return await handleResponse(res);
     },
     enabled: false,
   });

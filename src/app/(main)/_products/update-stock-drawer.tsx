@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { DefaultError, useMutation, useQuery } from "@tanstack/react-query";
-import { UnwrapSchema } from "elysia";
+import { InferRequestType } from "hono";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { AutoComplete } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
@@ -26,13 +27,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
+import { handleResponse } from "@/lib/utils";
 import { updateProductDtoSchema } from "@/server/modules/products/schema";
 
 export const UpdateStockDrawer = () => {
   const [open, setOpen] = useState(false);
 
-  const form = useForm<UnwrapSchema<typeof updateProductDtoSchema>>({
-    resolver: typeboxResolver(updateProductDtoSchema),
+  const form = useForm<z.infer<typeof updateProductDtoSchema>>({
+    resolver: zodResolver(updateProductDtoSchema),
     defaultValues: {
       name: "",
       quantity: 0,
@@ -43,18 +45,17 @@ export const UpdateStockDrawer = () => {
   const { mutate, isPending } = useMutation<
     unknown,
     DefaultError,
-    UnwrapSchema<typeof updateProductDtoSchema>
+    InferRequestType<(typeof client.api.products)[":id"]["$patch"]>["form"]
   >({
-    mutationKey: ["products"],
     mutationFn: async (values) => {
-      const { data, error } = await client.api.products
-        .stock({ id: values.name as string })
-        .patch(values);
+      const res = await client.api.products[":id"].$patch({
+        param: {
+          id: values.name as string,
+        },
+        form: values,
+      });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({
@@ -71,16 +72,13 @@ export const UpdateStockDrawer = () => {
   const { data, isFetching } = useQuery({
     queryKey: ["products", searchValue],
     queryFn: async () => {
-      const { data, error } = await client.api.products.index.get({
+      const res = await client.api.products.$get({
         query: {
           search: searchValue,
         },
       });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await handleResponse(res);
     },
     select: (data) => {
       return data.data.map(({ name, id }) => ({
@@ -105,7 +103,11 @@ export const UpdateStockDrawer = () => {
           <div className="p-4 pb-0">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit((values) => mutate(values))}
+                onSubmit={form.handleSubmit((values) =>
+                  mutate({
+                    quantity: String(values.quantity),
+                  })
+                )}
                 className="space-y-4"
               >
                 <FormField

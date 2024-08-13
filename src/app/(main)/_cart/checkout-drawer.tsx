@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { DefaultError, useMutation } from "@tanstack/react-query";
-import { UnwrapSchema } from "elysia";
+import { InferRequestType } from "hono";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,11 +30,9 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
+import { handleResponse } from "@/lib/utils";
 import { paymentMethodEnum } from "@/server/db/schema/transactions";
-import {
-  createTransactionDtoSchema,
-  createTransactionHeaderDtoSchema,
-} from "@/server/modules/transactions/schema";
+import { createTransactionHeaderDtoSchema } from "@/server/modules/transactions/schema";
 
 import { Item, useCartStore } from "./useCartStore";
 
@@ -46,8 +45,8 @@ export const CheckoutDrawer = ({ items }: Props) => {
 
   const removeAllItem = useCartStore((state) => state.removeAllItem);
 
-  const form = useForm<UnwrapSchema<typeof createTransactionHeaderDtoSchema>>({
-    resolver: typeboxResolver(createTransactionHeaderDtoSchema),
+  const form = useForm<z.infer<typeof createTransactionHeaderDtoSchema>>({
+    resolver: zodResolver(createTransactionHeaderDtoSchema),
     defaultValues: {
       customer: "",
       address: "",
@@ -62,15 +61,14 @@ export const CheckoutDrawer = ({ items }: Props) => {
   const { mutate, isPending } = useMutation<
     unknown,
     DefaultError,
-    UnwrapSchema<typeof createTransactionDtoSchema>
+    InferRequestType<(typeof client.api.transactions)["$post"]>["json"]
   >({
-    mutationKey: ["transaction"],
     mutationFn: async (values) => {
-      const { data, error } = await client.api.transactions.index.post(values);
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      const res = await client.api.transactions.$post({
+        json: values,
+      });
+
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       removeAllItem();
@@ -82,29 +80,6 @@ export const CheckoutDrawer = ({ items }: Props) => {
       setOpen(false);
     },
   });
-
-  const handleCheckout = (
-    formData: UnwrapSchema<typeof createTransactionHeaderDtoSchema>
-  ) => {
-    if (!items || items.length < 1) {
-      toast.error("cart is empty");
-      return;
-    }
-
-    mutate({
-      customer: formData.customer,
-      address: formData.address,
-      transactionStatus: formData.transactionStatus,
-      paymentStatus: formData.paymentStatus,
-      paymentMethod: formData.paymentMethod,
-      date: formData.date,
-      detail: items.map((val) => ({
-        productId: val.product.id,
-        price: val.product.price,
-        quantity: val.quantity,
-      })),
-    });
-  };
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -121,7 +96,26 @@ export const CheckoutDrawer = ({ items }: Props) => {
           <div className="p-4 pb-0">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(handleCheckout)}
+                onSubmit={form.handleSubmit((values) => {
+                  if (!items || items.length < 1) {
+                    toast.error("cart is empty");
+                    return;
+                  }
+
+                  mutate({
+                    customer: values.customer,
+                    address: values.address,
+                    transactionStatus: values.transactionStatus,
+                    paymentStatus: values.paymentStatus,
+                    paymentMethod: values.paymentMethod,
+                    date: values.date,
+                    detail: items.map((val) => ({
+                      productId: val.product.id,
+                      price: val.product.price,
+                      quantity: val.quantity,
+                    })),
+                  });
+                })}
                 className="space-y-4"
               >
                 <FormField

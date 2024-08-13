@@ -6,18 +6,12 @@ import { usersTable } from "../schema/users";
 async function userFactory() {
   const firstName = faker.person.firstName();
   const lastName = faker.person.lastName();
-  const date = faker.date.between({
-    from: "2023-01-01T00:00:00.000Z",
-    to: "2024-01-31T00:00:00.000Z",
-  });
 
   const userObj: typeof usersTable.$inferInsert = {
     id: faker.string.numeric(15),
     email: faker.internet.email({ firstName, lastName }),
     password: await Bun.password.hash("password"),
     role: "Member",
-    createdAt: date,
-    updatedAt: date,
   };
   return userObj;
 }

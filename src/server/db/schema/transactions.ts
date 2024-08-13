@@ -51,8 +51,16 @@ export const headerTransactionsTable = pgTable("headerTransactions", {
   date: timestamp("date", {
     mode: "string",
   }).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("modified_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", {
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("modified_at", {
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
 });
 
 export const detailTransactionsTable = pgTable("detailTransactions", {
@@ -67,8 +75,16 @@ export const detailTransactionsTable = pgTable("detailTransactions", {
     .references(() => productsTable.id),
   quantity: integer("quantity").notNull(),
   price: integer("price").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("modified_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", {
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("modified_at", {
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
 });
 
 export const transactionDetailSchema = z.object({

@@ -1,13 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { parseAsString, useQueryStates } from "nuqs";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { Heading } from "@/components/ui/heading";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { client } from "@/lib/client";
-import { sortByToState, stateToSortBy } from "@/lib/utils";
+import { handleResponse, sortByToState, stateToSortBy } from "@/lib/utils";
 
 import { SearchProduct } from "../search-input";
 import { getCategoryColumns } from "./columns";
@@ -29,15 +29,13 @@ export default function Page() {
   const { data, isLoading } = useQuery({
     queryKey: ["categories", query],
     queryFn: async () => {
-      const { data, error } = await client.api.categories.index.get({
+      const res = await client.api.categories.$get({
         query: query,
       });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await handleResponse(res);
     },
+    placeholderData: keepPreviousData,
   });
 
   const columns = getCategoryColumns();

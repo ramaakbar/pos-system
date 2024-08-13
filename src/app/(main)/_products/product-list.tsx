@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { PaginatedList } from "@/components/paginated-list";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
-import { numberToRupiah } from "@/lib/utils";
+import { handleResponse, numberToRupiah } from "@/lib/utils";
 import { Product } from "@/server/db/schema/products";
 
 import { useCartStore } from "../_cart/useCartStore";
@@ -16,14 +16,15 @@ export const ProductList = () => {
   const { data, isFetching } = useQuery({
     queryKey: ["products", query],
     queryFn: async () => {
-      const { data, error } = await client.api.products.index.get({
-        query: query,
+      const res = await client.api.products.$get({
+        query: {
+          search: query.search,
+          category: query.category,
+          page: String(query.page),
+        },
       });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await handleResponse(res);
     },
     placeholderData: keepPreviousData,
   });

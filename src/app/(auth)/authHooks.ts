@@ -5,10 +5,10 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { UnwrapSchema } from "elysia";
+import { InferRequestType } from "hono";
 
 import { client } from "@/lib/client";
-import { loginDtoSchema } from "@/server/modules/auth/schema";
+import { handleResponse } from "@/lib/utils";
 
 export const useGetCurrentUserQuery = () => {
   return useQuery({
@@ -16,7 +16,7 @@ export const useGetCurrentUserQuery = () => {
     queryFn: async () => {
       const res = await client.api.auth.me.$get();
 
-      return await res.json();
+      return (await handleResponse(res)).user;
     },
   });
 };
@@ -28,15 +28,13 @@ export const useLoginMutation = () => {
   return useMutation<
     unknown,
     DefaultError,
-    UnwrapSchema<typeof loginDtoSchema>
+    InferRequestType<(typeof client.api.auth)["login"]["$post"]>["json"]
   >({
-    mutationKey: ["register"],
     mutationFn: async (values) => {
-      const { data, error } = await client.api.auth.login.post(values);
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      const res = await client.api.auth.login.$post({
+        json: values,
+      });
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.resetQueries({ queryKey: ["current-user"] });
@@ -52,15 +50,13 @@ export const useRegisterMutation = () => {
   return useMutation<
     unknown,
     DefaultError,
-    UnwrapSchema<typeof loginDtoSchema>
+    InferRequestType<(typeof client.api.auth)["register"]["$post"]>["json"]
   >({
-    mutationKey: ["login"],
     mutationFn: async (values) => {
-      const { data, error } = await client.api.auth.register.post(values);
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      const res = await client.api.auth.register.$post({
+        json: values,
+      });
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.resetQueries({ queryKey: ["current-user"] });
@@ -74,13 +70,9 @@ export const useLogoutMutation = () => {
   const router = useRouter();
 
   return useMutation({
-    mutationKey: ["logout"],
     mutationFn: async () => {
-      const { data, error } = await client.api.auth.logout.post();
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      const res = await client.api.auth.logout.$post();
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.resetQueries({ queryKey: ["current-user"] });

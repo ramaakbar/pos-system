@@ -46,7 +46,7 @@ export const categoriesRoutes = new Hono<Env>()
           : asc(categoriesTable[sortBy])
       );
 
-    return ctx.json({ data: categories }, 200);
+    return ctx.json({ success: true, data: categories }, 200);
   })
   .get("/:id", validator("param", idParamSchema), async (ctx) => {
     const param = ctx.req.valid("param");
@@ -84,7 +84,7 @@ export const categoriesRoutes = new Hono<Env>()
       })
       .returning();
 
-    return ctx.json({ data: category }, 200);
+    return ctx.json({ success: true, data: category }, 200);
   })
   .delete("/:id", validator("param", idParamSchema), async (ctx) => {
     const param = ctx.req.valid("param");
@@ -137,6 +137,6 @@ export const categoriesRoutes = new Hono<Env>()
         .where(eq(categoriesTable.id, param.id))
         .returning();
 
-      return ctx.json({ data: category }, 200);
+      return ctx.json({ success: true, data: category }, 200);
     }
   );

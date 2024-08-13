@@ -21,8 +21,16 @@ export const usersTable = pgTable("users", {
     .default("Member")
     .notNull(),
   refreshTokenVersion: integer("refresh_token_version").default(1).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("modified_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", {
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("modified_at", {
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
 });
 
 export const userSchema = createSelectSchema(usersTable).omit({

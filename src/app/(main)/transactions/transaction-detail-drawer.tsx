@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
+import { handleResponse } from "@/lib/utils";
 
 import { TransactionDetail } from "./transaction-detail";
 
@@ -28,14 +29,13 @@ export const TransactionDetailDrawer = ({
   const { data, isLoading } = useQuery({
     queryKey: ["transactions", transactionId],
     queryFn: async () => {
-      const { data, error } = await client.api
-        .transactions({ id: transactionId })
-        .get();
+      const res = await client.api.transactions[":id"].$get({
+        param: {
+          id: transactionId,
+        },
+      });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await handleResponse(res);
     },
     enabled: open,
   });

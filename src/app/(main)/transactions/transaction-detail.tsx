@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DefaultError, useMutation } from "@tanstack/react-query";
-import { UnwrapSchema } from "elysia";
+import { InferRequestType } from "hono";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -10,14 +10,13 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Text } from "@/components/ui/text";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
-import { numberToRupiah } from "@/lib/utils";
+import { handleResponse, numberToRupiah } from "@/lib/utils";
 import {
   paymentStatusEnum,
   Transaction,
   TransactionHeader,
   transactionStatusEnum,
 } from "@/server/db/schema/transactions";
-import { updateTransactionStatusDtoSchema } from "@/server/modules/transactions/schema";
 
 type Props = {
   transaction: Transaction;
@@ -35,19 +34,17 @@ export const TransactionDetail = ({ transaction }: Props) => {
   const { mutateAsync } = useMutation<
     unknown,
     DefaultError,
-    UnwrapSchema<typeof updateTransactionStatusDtoSchema>
+    InferRequestType<(typeof client.api.transactions)[":id"]["$patch"]>["json"]
   >({
-    mutationKey: ["transactions"],
     mutationFn: async (values) => {
-      const { data, error } = await client.api
-        .transactions({
+      const res = await client.api.transactions[":id"].$patch({
+        param: {
           id: transaction.id,
-        })
-        .patch(values);
-      if (error) {
-        throw error.value;
-      }
-      return data;
+        },
+        json: values,
+      });
+
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({

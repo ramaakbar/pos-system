@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Badge } from "@/components/ui/badge";
 import { client } from "@/lib/client";
+import { handleResponse } from "@/lib/utils";
 
 import { useProductPageQueryStates } from "../page-query";
 
@@ -11,14 +12,11 @@ export const CategoryFilterList = () => {
   const { data, isFetching } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data, error } = await client.api.categories.index.get({
+      const res = await client.api.categories.$get({
         query: {},
       });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await handleResponse(res);
     },
   });
 

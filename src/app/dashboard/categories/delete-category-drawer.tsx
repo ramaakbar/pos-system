@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { DefaultError, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/drawer";
 import { client } from "@/lib/client";
 import { queryClient } from "@/lib/react-query";
+import { handleResponse } from "@/lib/utils";
 import { Category } from "@/server/db/schema/categories";
 
 type Props = {
@@ -27,17 +28,15 @@ export const DeleteCategoryDrawer = ({
   isOpen,
   setIsOpen,
 }: Props) => {
-  const { mutate, isPending } = useMutation<unknown, DefaultError>({
-    mutationKey: ["categories", category.id],
+  const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      const { data, error } = await client.api
-        .categories({ id: category.id })
-        .delete();
+      const res = await client.api.categories[":id"].$delete({
+        param: {
+          id: category.id,
+        },
+      });
 
-      if (error) {
-        throw error.value;
-      }
-      return data;
+      return await handleResponse(res);
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({
