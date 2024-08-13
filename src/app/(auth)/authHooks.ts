@@ -72,7 +72,7 @@ export const useLogoutMutation = () => {
   return useMutation({
     mutationFn: async () => {
       const res = await client.api.auth.logout.$post();
-      return await handleResponse(res);
+      return await res.json();
     },
     onSuccess: async () => {
       queryClient.resetQueries({ queryKey: ["current-user"] });
