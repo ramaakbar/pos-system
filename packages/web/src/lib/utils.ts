@@ -4,16 +4,14 @@ import { clsx } from "clsx";
 import { ClientResponse } from "hono/client";
 import { twMerge } from "tailwind-merge";
 
-import { env } from "./env";
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function getBaseUrl() {
-  if (env.BACKEND_URL.startsWith("localhost"))
-    return `http://${env.BACKEND_URL}`;
-  return `https://${env.BACKEND_URL}`;
+  if (process.env.NEXT_PUBLIC_BACKEND_URL?.startsWith("localhost"))
+    return `http://${process.env.NEXT_PUBLIC_BACKEND_URL}`;
+  return `https://${process.env.NEXT_PUBLIC_BACKEND_URL}`;
 }
 
 export const numberToRupiah = (val: number): string => {
