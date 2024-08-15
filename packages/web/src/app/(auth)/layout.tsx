@@ -20,7 +20,7 @@ export default function AuthLayout({
   }
 
   if (!isFetching && user) {
-    router.push("/dashboard");
+    router.push("/");
   }
 
   if (!isFetching && !user) {
