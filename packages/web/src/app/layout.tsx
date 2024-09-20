@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 
-import { cn, getBaseUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 import { Providers } from "../components/providers";
 
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "POS System",
     description: "pos system desc",
-    url: getBaseUrl(),
+    url: "https://pos.ramaakbar.xyz",
     siteName: "POS System",
   },
   twitter: {

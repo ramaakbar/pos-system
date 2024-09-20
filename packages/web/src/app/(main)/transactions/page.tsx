@@ -59,7 +59,7 @@ export default function Page() {
         {!isFetching && (!data || data.data.length === 0) && (
           <div className="flex h-full items-center justify-center">No Data</div>
         )}
-        {!isFetching && data && (
+        {!isFetching && data && data.data.length > 0 && (
           <div className="mb-6 grid grid-cols-12 gap-6">
             {data.data.map((transaction) => (
               <div
