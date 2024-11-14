@@ -1,0 +1,6 @@
+.envrc
+.env
+bin
+tmp
+ecom
+go-api
