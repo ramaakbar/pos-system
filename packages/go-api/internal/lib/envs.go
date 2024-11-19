@@ -30,19 +30,16 @@ func initConfig() Config {
 	godotenv.Load()
 
 	return Config{
-		Port: getEnv("PORT", "3002"),
-
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "''"),
-		DBName:     getEnv("DB_NAME", "pos"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		// DBUser:                 getEnv("DB_USER", "root"),
-		// DBPassword:             getEnv("DB_PASSWORD", "mypassword"),
-		// DBAddress:              fmt.Sprintf("%s:%s", getEnv("DB_HOST", "127.0.0.1"), getEnv("DB_PORT", "3306")),
-		// DBName:                 getEnv("DB_NAME", "ecom"),
-		// JWTSecret:              getEnv("JWT_SECRET", "not-so-secret-now-is-it?"),
-		// JWTExpirationInSeconds: getEnvAsInt("JWT_EXPIRATION_IN_SECONDS", 3600*24*7),
+		Port:               getEnv("PORT", "3002"),
+		Env:                getEnv("NODE_ENV", "development"),
+		Domain:             getEnv("DOMAIN", ""),
+		DBHost:             getEnv("DB_HOST", "localhost"),
+		DBUser:             getEnv("DB_USER", "postgres"),
+		DBPassword:         getEnv("DB_PASSWORD", "''"),
+		DBName:             getEnv("DB_NAME", "pos"),
+		DBPort:             getEnv("DB_PORT", "5432"),
+		RefreshTokenSecret: getEnv("REFRESH_TOKEN_SECRET", ""),
+		AccessTokenSecret:  getEnv("ACCESS_TOKEN_SECRET", ""),
 	}
 }
 

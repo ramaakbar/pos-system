@@ -36,7 +36,6 @@ func CustomHTTPErrorHandler(err error, c echo.Context) {
 type CustomJSONSerializer struct{}
 
 func (d CustomJSONSerializer) Serialize(c echo.Context, i interface{}, indent string) error {
-	fmt.Print("HALO ")
 	enc := json.NewEncoder(c.Response())
 	if indent != "" {
 		enc.SetIndent("", indent)

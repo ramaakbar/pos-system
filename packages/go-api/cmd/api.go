@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"go-api/internal/lib"
+	"go-api/internal/modules/auth"
 	"net/http"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/postgres"
@@ -22,31 +24,47 @@ type User struct {
 	ModifiedAt          time.Time `json:"-"`
 }
 
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
+
 func main() {
 	e := echo.New()
 
 	e.HTTPErrorHandler = lib.CustomHTTPErrorHandler
 
+	e.Validator = &CustomValidator{validator: validator.New()}
+
 	e.JSONSerializer = &lib.CustomJSONSerializer{}
 
 	e.Pre(middleware.RemoveTrailingSlash())
 
-	e.Use(middleware.Logger())
-
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"https://pos.ramaakbar.xyz", "http://localhost:3000"},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-		AllowCredentials: true,
-	}))
-
-	// e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-	// 	TokenLookup:    "cookie:_csrf",
-	// 	CookiePath:     "/",
-	// 	CookieDomain:   "example.com",
-	// 	CookieSecure:   true,
-	// 	CookieHTTPOnly: true,
-	// 	CookieSameSite: http.SameSiteStrictMode,
-	// }))
+	e.Use(middleware.Recover(),
+		middleware.Secure(),
+		middleware.RequestID(),
+		middleware.Gzip(),
+		middleware.Logger(),
+		// middleware.TimeoutWithConfig(middleware.TimeoutConfig{
+		// 	Timeout: c.Config.App.Timeout,
+		// }),
+		middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins:     []string{"https://pos.ramaakbar.xyz", "http://localhost:3000"},
+			AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+			AllowCredentials: true,
+		}),
+		// middleware.CSRFWithConfig(middleware.CSRFConfig{
+		// 	TokenLookup:    "cookie:_csrf",
+		// 	CookiePath:     "/",
+		// 	CookieDomain:   "example.com",
+		// 	CookieSecure:   true,
+		// 	CookieHTTPOnly: true,
+		// 	CookieSameSite: http.SameSiteStrictMode,
+		// })
+	)
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", lib.Envs.DBHost, lib.Envs.DBUser, lib.Envs.DBPassword, lib.Envs.DBName, lib.Envs.DBPort)
 
@@ -62,21 +80,7 @@ func main() {
 		})
 	})
 
-	e.GET(("users"), func(c echo.Context) error {
-		var users []User
-		result := db.Unscoped().Select("id", "email", "role").Find(&users)
-
-		if result.Error != nil {
-			return c.JSON((http.StatusInternalServerError), struct {
-				Message string `json:"message"`
-			}{Message: result.Error.Error()})
-		}
-
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"success": true,
-			"data":    users,
-		})
-	})
+	auth.AuthRoutes(e, db)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", lib.Envs.Port)))
 }
