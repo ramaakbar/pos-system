@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -43,11 +44,29 @@ func main() {
 
 	e.Pre(middleware.RemoveTrailingSlash())
 
-	e.Use(middleware.Recover(),
+	logger, _ := zap.NewProduction()
+
+	e.Use(
+		middleware.Recover(),
 		middleware.Secure(),
 		middleware.RequestID(),
 		middleware.Gzip(),
-		middleware.Logger(),
+		middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+			LogMethod:   true,
+			LogURI:      true,
+			LogStatus:   true,
+			LogRemoteIP: true,
+			LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+				logger.Info("request",
+					zap.String("method", v.Method),
+					zap.String("URI", v.URI),
+					zap.Int("status", v.Status),
+					zap.String("ip", v.RemoteIP),
+				)
+
+				return nil
+			},
+		}),
 		// middleware.TimeoutWithConfig(middleware.TimeoutConfig{
 		// 	Timeout: c.Config.App.Timeout,
 		// }),
